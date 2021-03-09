@@ -14,15 +14,10 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from cyberP.views import IndexView, CyberparlementUpdateView, CyberparlementListView
-
-app_name = 'cyberP'
+from django.urls import path, include
+import cyberP.urls
 
 urlpatterns = [
-    path('', IndexView.as_view(), name='index'),
-    # path('cyberparlements/', FirstCyberparlementListView.as_view(), name='cyberparlement-list'),
-    path('cyberparlements/', CyberparlementListView.as_view(), name='cyberparlement-list'),
-    # path('cyberparlements/<int:pk>/', CyberparlementDetailView.as_view(), name='cyberparlement-detail'),
-    path('cyberparlements/<int:pk>/update/', CyberparlementUpdateView.as_view(), name='cyberparlement-update'),
+    path('admin/', admin.site.urls),
+    path('', include(cyberP.urls)),
 ]

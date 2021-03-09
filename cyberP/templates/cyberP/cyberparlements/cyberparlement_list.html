@@ -1,10 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% block content %}
+     {{ test|safe }}
+{#    <h1>Liste des Cyberparlements</h1>#}
+{#    {% for c in cyberparlements %}#}
+{#        <a href="{% url 'cyberP:cyberparlement-detail' pk=c.idcyberparlement %}">#}
+{#            <div style="padding: 10px; border: black solid 1px; margin-bottom: 5px">#}
+{#                {{ c.nom }}#}
+{#                <a href="{% url 'cyberP:cyberparlement-update' pk=c.idcyberparlement %}">#}
+{#                    <button>Modifier</button>#}
+{#                </a>#}
+{#            </div>#}
+{#        </a>#}
+{#    {% endfor %}#}
+{% endblock content %}

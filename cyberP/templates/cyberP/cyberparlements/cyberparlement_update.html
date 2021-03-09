@@ -1,10 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% block content %}
+    <h1>Modification de {{ cyberparlement.nom }}</h1>
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            {{ field.label_tag }}
+            {{ field }}
+            <br>
+        {% endfor %}
+        <label>Cyberchancelier:
+            <select name="cyberchancelier" id="cyberchancelier">
+                {% for member in members %}
+                    <option value="{{ member.idpersonne }}">{{ member.prenom }} {{ member.nom }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <br>
+        <input type="submit" value="Submit">
+    </form>
+{% endblock content %}
