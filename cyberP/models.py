@@ -30,14 +30,26 @@ class Choixinitiative(models.Model):
         db_table = 'choixinitiative'
 
 
+VISIBILITY_PUBLIC_KEY = 'PU'
+VISIBILITY_PUBLIC_VALUE = 'Public'
+
+VISIBILITY_PRIVATE_KEY = 'PR'
+VISIBILITY_PRIVATE_VALUE = 'Privé'
+
 VISIBILITY_CHOICES = [
-    ('PU', 'Public'),
-    ('PR', 'Privé'),
+    (VISIBILITY_PUBLIC_KEY, VISIBILITY_PUBLIC_VALUE),
+    (VISIBILITY_PRIVATE_KEY, VISIBILITY_PRIVATE_VALUE),
 ]
 
+STATUS_DRAFT_VALUE = 'Brouillon'
+STATUS_DRAFT_KEY = 'BR'
+
+STATUS_POSTED_KEY = 'PU'
+STATUS_POSTED_VALUE = 'Publié'
+
 STATUS_CHOICES = [
-    ('BR', 'Brouillon'),
-    ('PU', 'Publié')
+    (STATUS_DRAFT_KEY, STATUS_DRAFT_VALUE),
+    (STATUS_POSTED_KEY, STATUS_POSTED_VALUE)
 ]
 
 
@@ -47,8 +59,8 @@ class Cyberparlement(models.Model):
     description = models.CharField(db_column='Description', max_length=200, blank=True, null=True)  # Field name made lowercase.
     # visibilite = models.CharField(db_column='Visibilite', max_length=45, blank=True, null=True)  # Field name made lowercase.
     # statut = models.ForeignKey('Statutensemble', models.DO_NOTHING, db_column='Statut', blank=True, null=True)  # Field name made lowercase.
-    visibilite = models.CharField(db_column='Visibilite', max_length=200, choices=VISIBILITY_CHOICES, default='PU')
-    statut = models.CharField(db_column='Statutensemble', max_length=200, choices=STATUS_CHOICES, default='BR')
+    visibilite = models.CharField(db_column='Visibilite', max_length=200, choices=VISIBILITY_CHOICES, default=VISIBILITY_PUBLIC_KEY)
+    statut = models.CharField(db_column='Statutensemble', max_length=200, choices=STATUS_CHOICES, default=STATUS_DRAFT_KEY)
     cyberparlementparent = models.ForeignKey('self', models.DO_NOTHING, db_column='CPParent', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -100,11 +112,24 @@ class Initiative(models.Model):
         db_table = 'initiative'
 
 
+ROLE_CYBERCHANCELIER_KEY = 'CC'
+ROLE_CYBERCHANCELIER_VALUE = 'CyberChancelier'
+
+ROLE_MEMBER_KEY = 'ME'
+ROLE_MEMBER_VALUE = 'Membre'
+
+ROLE_CHOICES = [
+    (ROLE_CYBERCHANCELIER_KEY, ROLE_CYBERCHANCELIER_VALUE),
+    (ROLE_MEMBER_KEY, ROLE_MEMBER_VALUE)
+]
+
+
 class Membrecp(models.Model):
     idmembrecyberparlement = models.AutoField(db_column='idMembreCP', primary_key=True)  # Field name made lowercase.
     personne = models.ForeignKey('Personne', models.DO_NOTHING, db_column='idPersonne')  # Field name made lowercase.
     cyberparlement = models.ForeignKey(Cyberparlement, models.DO_NOTHING, db_column='idCyberParlement')  # Field name made lowercase.
-    rolemembrecyberparlement = models.ForeignKey('Rolemembrecp', models.DO_NOTHING, db_column='RoleCP')  # Field name made lowercase.
+    # rolemembrecyberparlement = models.ForeignKey('Rolemembrecp', models.DO_NOTHING, db_column='RoleCP')  # Field name made lowercase.
+    rolemembrecyberparlement = models.CharField(db_column='RoleCP', max_length=200, choices=ROLE_CHOICES, default=ROLE_MEMBER_KEY)
 
     class Meta:
         managed = True
@@ -151,21 +176,21 @@ class Personne(models.Model):
         db_table = 'personne'
 
 
-class Rolemembrecp(models.Model):
-    rolecyberparlement = models.CharField(db_column='RoleCP', primary_key=True, max_length=45)  # Field name made lowercase.
-    description = models.CharField(db_column='Description', max_length=200, blank=True, null=True)  # Field name made lowercase.
+# class Rolemembrecp(models.Model):
+#     rolecyberparlement = models.CharField(db_column='RoleCP', primary_key=True, max_length=45)  # Field name made lowercase.
+#     description = models.CharField(db_column='Description', max_length=200, blank=True, null=True)  # Field name made lowercase.
+#
+#     class Meta:
+#         managed = True
+#         db_table = 'rolemembrecp'
 
-    class Meta:
-        managed = True
-        db_table = 'rolemembrecp'
 
-
-class Statutensemble(models.Model):
-    statuttexte = models.CharField(db_column='StatutTexte', primary_key=True, max_length=45)  # Field name made lowercase.
-
-    class Meta:
-        managed = True
-        db_table = 'statutensemble'
+# class Statutensemble(models.Model):
+#     statuttexte = models.CharField(db_column='StatutTexte', primary_key=True, max_length=45)  # Field name made lowercase.
+#
+#     class Meta:
+#         managed = True
+#         db_table = 'statutensemble'
 
 
 class Statutinitiative(models.Model):

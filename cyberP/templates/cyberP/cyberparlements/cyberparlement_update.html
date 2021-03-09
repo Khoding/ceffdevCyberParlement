@@ -1,3 +1,4 @@
+{% extends 'base.html' %}
 {% block content %}
     <h1>Modification de {{ cyberparlement.nom }}</h1>
     <form method="post">
@@ -7,6 +8,11 @@
             {{ field }}
             <br>
         {% endfor %}
+        <br>
+        <input type="submit" value="Modifier">
+    </form>
+    <hr>
+    <div>
         <label>Cyberchancelier:
             <select name="cyberchancelier" id="cyberchancelier">
                 {% for member in members %}
@@ -15,6 +21,6 @@
             </select>
         </label>
         <br>
-        <input type="submit" value="Submit">
-    </form>
+        <input type="submit" id='submit-cyberchancelier' value="Enregistrer">
+    </div>
 {% endblock content %}

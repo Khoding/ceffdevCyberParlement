@@ -1,8 +1,12 @@
+from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView, ListView, DetailView, UpdateView
-from .models import Cyberparlement, Membrecp, Personne
+from django.views.generic import TemplateView, ListView, UpdateView
+from .models import Cyberparlement, Membrecp, Personne, ROLE_MEMBER_KEY, ROLE_CYBERCHANCELIER_KEY
 from .forms import CyberparlementChangeForm
+
+import json
 
 url = 'http://127.0.0.1:8000'
 content = ''
@@ -12,26 +16,6 @@ class IndexView(ListView):
     template_name = 'cyberP/index.html'
     context_object_name = 'personnes'
     model = Personne
-
-
-# class FirstCyberparlementListView(ListView):
-#     template_name = 'cyberP/cyberparlements/cyberparlement_list.html'
-#     context_object_name = 'cyberparlements'
-#     model = Cyberparlement
-#
-#     def get_queryset(self):
-#         return self.model.objects.filter(cyberparlementparent=None)
-
-
-# class CyberparlementDetailView(DetailView):
-#     template_name = 'cyberP/cyberparlements/cyberparlement_detail.html'
-#     model = Cyberparlement
-#
-#     def get_context_data(self, **kwargs):
-#         cyberparlements = Cyberparlement.objects.filter(cyberparlementparent=self.kwargs['pk'])
-#         context = super().get_context_data(**kwargs)
-#         context['cyberparlements'] = cyberparlements
-#         return context
 
 
 def parse_tree(tree, root=None):
@@ -54,17 +38,18 @@ def print_tree(tree):
     if tree is not None and len(tree) > 0:
         content += '<div style=padding:10px;>'
         for node in tree:
-            content += '<div style=padding:10px;border-style:solid;margin-bottom:10px>{}<br>{}' \
+            content += '<div style=padding:10px;border-style:solid;margin-bottom:10px><b>{}</b><br>{}' \
                        '    <a href={}/cyberparlements/{}/update>' \
                        '        <button> Modifier </button>' \
-                       '    </a>'.format(node['nom'], node['description'], url, node['idcyberparlement'])
+                       '    </a>'.format(node['nom'], node['description'] if node['description'] else '', url, node['idcyberparlement'])
             print_tree(node['enfant'])
             content += '</div>'
         content += '</div>'
     return content
 
 
-result = print_tree(parse_tree(list(Cyberparlement.objects.values())))
+cyberparlement_tree = list(Cyberparlement.objects.values())
+result = print_tree(parse_tree(cyberparlement_tree))
 
 
 class CyberparlementListView(TemplateView):
@@ -72,7 +57,7 @@ class CyberparlementListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['test'] = result
+        context['content'] = result
         return context
 
 
@@ -81,17 +66,48 @@ class CyberparlementUpdateView(UpdateView):
     form_class = CyberparlementChangeForm
     model = Cyberparlement
 
-    def get_cyberparlement_member(self):
+    def get_cyberparlement_members(self):
         members = list(Membrecp.objects.filter(cyberparlement=self.kwargs['pk']).values())
         persons = list(Personne.objects.values())
         return [person for person in persons for member in members if member['personne_id'] == person['idpersonne']]
 
+    def get_id_person_selected(self):
+        res = None
+        if self.request.method == 'POST':
+            data = json.loads(self.request.body.decode('utf-8'))
+            res = data['person_selected_id']
+        return res
+
+    def get_current_cyberchancelier(self):
+        member = Membrecp.objects.get(
+            cyberparlement_id=self.kwargs['pk'],
+            rolemembrecyberparlement='CY'
+        )
+        return member
+
     def get_success_url(self, *args, **kwargs):
         return reverse_lazy("cyberP:cyberparlement-list")
 
+    def delete_current_cyberchancelier(self):
+        current_cyberchancelier = self.get_current_cyberchancelier()
+        current_cyberchancelier.rolemembrecyberparlement = ROLE_MEMBER_KEY
+        current_cyberchancelier.save()
+
+    def set_cyberchancelier(self):
+        if self.get_id_person_selected():
+            self.delete_current_cyberchancelier()
+            member_selected = Membrecp.objects.get(
+                personne_id=self.get_id_person_selected(),
+                cyberparlement_id=Cyberparlement.objects.get(idcyberparlement=self.kwargs['pk']).idcyberparlement
+            )
+            member_selected.rolemembrecyberparlement = ROLE_CYBERCHANCELIER_KEY
+            member_selected.save()
+
     def get_context_data(self, **kwargs):
+        self.set_cyberchancelier()
+        print(self.get_current_cyberchancelier().personne.idpersonne)
         context = super().get_context_data(**kwargs)
-        context['members'] = self.get_cyberparlement_member()
+        context['members'] = self.get_cyberparlement_members()
         return context
 
 
