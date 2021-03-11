@@ -1,6 +1,3 @@
-from django.db.models import Q
-from django.http import HttpResponse
-from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, ListView, UpdateView
 from .models import Cyberparlement, Membrecp, Personne, ROLE_MEMBER_KEY, ROLE_CYBERCHANCELIER_KEY
@@ -48,14 +45,14 @@ def print_tree(tree):
     return content
 
 
-cyberparlement_tree = list(Cyberparlement.objects.values())
-result = print_tree(parse_tree(cyberparlement_tree))
-
-
 class CyberparlementListView(TemplateView):
     template_name = 'cyberP/cyberparlements/cyberparlement_list.html'
 
     def get_context_data(self, **kwargs):
+        global content
+        content = ''
+        cyberparlement_tree = list(Cyberparlement.objects.values())
+        result = print_tree(parse_tree(cyberparlement_tree))
         context = super().get_context_data(**kwargs)
         context['content'] = result
         return context
@@ -81,12 +78,9 @@ class CyberparlementUpdateView(UpdateView):
     def get_current_cyberchancelier(self):
         member = Membrecp.objects.get(
             cyberparlement_id=self.kwargs['pk'],
-            rolemembrecyberparlement='CY'
+            rolemembrecyberparlement=ROLE_CYBERCHANCELIER_KEY
         )
         return member
-
-    def get_success_url(self, *args, **kwargs):
-        return reverse_lazy("cyberP:cyberparlement-list")
 
     def delete_current_cyberchancelier(self):
         current_cyberchancelier = self.get_current_cyberchancelier()
@@ -95,7 +89,8 @@ class CyberparlementUpdateView(UpdateView):
 
     def set_cyberchancelier(self):
         if self.get_id_person_selected():
-            self.delete_current_cyberchancelier()
+            if self.get_current_cyberchancelier():
+                self.delete_current_cyberchancelier()
             member_selected = Membrecp.objects.get(
                 personne_id=self.get_id_person_selected(),
                 cyberparlement_id=Cyberparlement.objects.get(idcyberparlement=self.kwargs['pk']).idcyberparlement
@@ -103,9 +98,11 @@ class CyberparlementUpdateView(UpdateView):
             member_selected.rolemembrecyberparlement = ROLE_CYBERCHANCELIER_KEY
             member_selected.save()
 
+    def get_success_url(self, *args, **kwargs):
+        return reverse_lazy("cyberP:cyberparlement-list")
+
     def get_context_data(self, **kwargs):
         self.set_cyberchancelier()
-        print(self.get_current_cyberchancelier().personne.idpersonne)
         context = super().get_context_data(**kwargs)
         context['members'] = self.get_cyberparlement_members()
         return context
