@@ -1,5 +1,5 @@
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView, ListView, UpdateView
+from django.views.generic import TemplateView, ListView, UpdateView, DeleteView
 from .models import Cyberparlement, Membrecp, Personne, ROLE_MEMBER_KEY, ROLE_CYBERCHANCELIER_KEY
 from .forms import CyberparlementChangeForm
 
@@ -24,7 +24,8 @@ def parse_tree(tree, root=None):
                     'idcyberparlement': child['idcyberparlement'],
                     'nom': child['nom'],
                     'description': child['description'],
-                    'cyberchancelier': child['cyberchancelier']['prenom'] + ' ' + child['cyberchancelier']['nom'] if 'cyberchancelier' in child else 'Aucun cyberchancelier sélectionné',
+                    'cyberchancelier': child['cyberchancelier']['prenom'] + ' ' + child['cyberchancelier']['nom']
+                    if 'cyberchancelier' in child else 'Aucun cyberchancelier sélectionné',
                     'enfant': parse_tree(tree, child)
                 }
             )
@@ -34,12 +35,18 @@ def parse_tree(tree, root=None):
 def print_tree(tree):
     global content
     if tree is not None and len(tree) > 0:
-        content += '<div style=padding:10px;border-style:solid;border-color:green;>'
+        content += '<div style=padding:10px;>'
         for node in tree:
             content += '<div style=padding:10px;border-style:solid;margin-bottom:10px><b>{}</b><br>Cyberchancelier: {}<br>{}' \
                        '    <a href={}/cyberparlements/{}/update>' \
                        '        <button> Modifier </button>' \
-                       '    </a>'.format(node['nom'], node['cyberchancelier'], node['description'] if node['description'] else '', url, node['idcyberparlement'])
+                       '    </a>' \
+                       '    <a href={}/cyberparlements/{}/members>' \
+                       '        <button> Liste des membres </button>' \
+                       '    </a>'.format(node['nom'], node['cyberchancelier'],
+                                         node['description'] if node['description'] else '',
+                                         url, node['idcyberparlement'],
+                                         url, node['idcyberparlement'])
             print_tree(node['enfant'])
             content += '</div>'
         content += '</div>'
@@ -77,15 +84,16 @@ class CyberparlementListView(TemplateView):
         return context
 
 
+def get_cyberparlement_member_list(idcyberparlement):
+    members = list(Membrecp.objects.filter(cyberparlement=idcyberparlement).values())
+    persons = list(Personne.objects.values())
+    return [person for person in persons for member in members if member['personne_id'] == person['idpersonne']]
+
+
 class CyberparlementUpdateView(UpdateView):
     template_name = 'cyberP/cyberparlements/cyberparlement_update.html'
     form_class = CyberparlementChangeForm
     model = Cyberparlement
-
-    def get_cyberparlement_member_list(self):
-        members = list(Membrecp.objects.filter(cyberparlement=self.kwargs['pk']).values())
-        persons = list(Personne.objects.values())
-        return [person for person in persons for member in members if member['personne_id'] == person['idpersonne']]
 
     def get_id_person_selected(self):
         res = None
@@ -126,10 +134,43 @@ class CyberparlementUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         self.set_cyberchancelier()
         context = super().get_context_data(**kwargs)
-        context['members'] = self.get_cyberparlement_member_list()
+        context['members'] = get_cyberparlement_member_list(self.kwargs['pk'])
         return context
 
 
-class MemberListView(ListView):
+class MemberListView(TemplateView):
     template_name = 'cyberP/members/member_list.html'
-    model = Personne
+
+    def get_cyberparlement_member_list_with_rules(self):
+        persons = get_cyberparlement_member_list(self.kwargs['pk'])
+        members = list(Membrecp.objects.values())
+
+        for member in members:
+            for person in persons:
+                if person['idpersonne'] == member['personne_id']:
+                    person['role'] = member['rolemembrecyberparlement']
+                    person['idmembrecyberparlement'] = member['idmembrecyberparlement']
+        return persons
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['members'] = self.get_cyberparlement_member_list_with_rules()
+        context['cyberchancelier'] = ROLE_CYBERCHANCELIER_KEY
+        return context
+
+
+class MemberDeleteView(DeleteView):
+    model = Membrecp
+    template_name = 'cyberP/members/member_confirm_delete.html'
+
+    def get_member_fullname(self):
+        person = Membrecp.objects.get(idmembrecyberparlement=self.kwargs['pk']).personne
+        return '{} {}'.format(person.prenom, person.nom)
+
+    def get_success_url(self):
+        return reverse_lazy("cyberP:cyberparlement-list")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['person_fullname'] = self.get_member_fullname()
+        return context

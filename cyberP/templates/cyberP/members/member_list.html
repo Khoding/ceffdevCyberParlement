@@ -1,2 +1,13 @@
+{% extends 'base.html' %}
 {% block content %}
+    {% for member in members %}
+        <div>
+            {{ member.prenom }} {{ member.nom }}
+            {% if member.role != cyberchancelier %}
+                <a href="{% url 'cyberP:cyberparlement-member-confirm-delete' pk=member.idmembrecyberparlement %}">
+                    <button>Ban</button>
+                </a>
+            {% endif %}
+        </div>
+    {% endfor %}
 {% endblock %}
