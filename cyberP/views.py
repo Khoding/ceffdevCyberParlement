@@ -24,6 +24,7 @@ def parse_tree(tree, root=None):
                     'idcyberparlement': child['idcyberparlement'],
                     'nom': child['nom'],
                     'description': child['description'],
+                    'cyberchancelier': child['cyberchancelier']['prenom'] + ' ' + child['cyberchancelier']['nom'] if 'cyberchancelier' in child else 'Aucun cyberchancelier sélectionné',
                     'enfant': parse_tree(tree, child)
                 }
             )
@@ -33,28 +34,46 @@ def parse_tree(tree, root=None):
 def print_tree(tree):
     global content
     if tree is not None and len(tree) > 0:
-        content += '<div style=padding:10px;>'
+        content += '<div style=padding:10px;border-style:solid;border-color:green;>'
         for node in tree:
-            content += '<div style=padding:10px;border-style:solid;margin-bottom:10px><b>{}</b><br>{}' \
+            content += '<div style=padding:10px;border-style:solid;margin-bottom:10px><b>{}</b><br>Cyberchancelier: {}<br>{}' \
                        '    <a href={}/cyberparlements/{}/update>' \
                        '        <button> Modifier </button>' \
-                       '    </a>'.format(node['nom'], node['description'] if node['description'] else '', url, node['idcyberparlement'])
+                       '    </a>'.format(node['nom'], node['cyberchancelier'], node['description'] if node['description'] else '', url, node['idcyberparlement'])
             print_tree(node['enfant'])
             content += '</div>'
         content += '</div>'
     return content
 
 
+def get_cyberchancelier_list():
+    members = list(Membrecp.objects.values())
+    persons = list(Personne.objects.values())
+    return [{'person': person,
+             'idcyberparlement': member['cyberparlement_id']}
+            for person in persons for member in members
+            if member['personne_id'] == person['idpersonne'] and member['rolemembrecyberparlement'] == ROLE_CYBERCHANCELIER_KEY]
+
+
+def get_cyberparlement_list():
+    global content
+    content = ''
+    cyberparlement_list = list(Cyberparlement.objects.values())
+    cyberchancelier_list = get_cyberchancelier_list()
+    for cyberparlement in cyberparlement_list:
+        for cyberchancelier in cyberchancelier_list:
+            if cyberparlement['idcyberparlement'] == cyberchancelier['idcyberparlement']:
+                cyberparlement['cyberchancelier'] = cyberchancelier['person']
+
+    return print_tree(parse_tree(cyberparlement_list))
+
+
 class CyberparlementListView(TemplateView):
     template_name = 'cyberP/cyberparlements/cyberparlement_list.html'
 
     def get_context_data(self, **kwargs):
-        global content
-        content = ''
-        cyberparlement_tree = list(Cyberparlement.objects.values())
-        result = print_tree(parse_tree(cyberparlement_tree))
         context = super().get_context_data(**kwargs)
-        context['content'] = result
+        context['content'] = get_cyberparlement_list()
         return context
 
 
@@ -63,7 +82,7 @@ class CyberparlementUpdateView(UpdateView):
     form_class = CyberparlementChangeForm
     model = Cyberparlement
 
-    def get_cyberparlement_members(self):
+    def get_cyberparlement_member_list(self):
         members = list(Membrecp.objects.filter(cyberparlement=self.kwargs['pk']).values())
         persons = list(Personne.objects.values())
         return [person for person in persons for member in members if member['personne_id'] == person['idpersonne']]
@@ -76,10 +95,13 @@ class CyberparlementUpdateView(UpdateView):
         return res
 
     def get_current_cyberchancelier(self):
-        member = Membrecp.objects.get(
-            cyberparlement_id=self.kwargs['pk'],
-            rolemembrecyberparlement=ROLE_CYBERCHANCELIER_KEY
-        )
+        try:
+            member = Membrecp.objects.get(
+                cyberparlement_id=self.kwargs['pk'],
+                rolemembrecyberparlement=ROLE_CYBERCHANCELIER_KEY
+            )
+        except Membrecp.DoesNotExist:
+            member = None
         return member
 
     def delete_current_cyberchancelier(self):
@@ -104,7 +126,7 @@ class CyberparlementUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         self.set_cyberchancelier()
         context = super().get_context_data(**kwargs)
-        context['members'] = self.get_cyberparlement_members()
+        context['members'] = self.get_cyberparlement_member_list()
         return context
 
 
