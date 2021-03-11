@@ -25,7 +25,7 @@ def parse_tree(tree, root=None):
                     'nom': child['nom'],
                     'description': child['description'],
                     'cyberchancelier': child['cyberchancelier']['prenom'] + ' ' + child['cyberchancelier']['nom']
-                    if 'cyberchancelier' in child else 'Aucun cyberchancelier sélectionné',
+                    if 'cyberchancelier' in child else 'Aucun cyberchancelier',
                     'enfant': parse_tree(tree, child)
                 }
             )
@@ -35,18 +35,35 @@ def parse_tree(tree, root=None):
 def print_tree(tree):
     global content
     if tree is not None and len(tree) > 0:
-        content += '<div style=padding:10px;>'
+        content += '<div class=cp-list-container>'
         for node in tree:
-            content += '<div style=padding:10px;border-style:solid;margin-bottom:10px><b>{}</b><br>Cyberchancelier: {}<br>{}' \
-                       '    <a href={}/cyberparlements/{}/update>' \
-                       '        <button> Modifier </button>' \
-                       '    </a>' \
-                       '    <a href={}/cyberparlements/{}/members>' \
-                       '        <button> Liste des membres </button>' \
-                       '    </a>'.format(node['nom'], node['cyberchancelier'],
-                                         node['description'] if node['description'] else '',
-                                         url, node['idcyberparlement'],
-                                         url, node['idcyberparlement'])
+            content += '<div class=cp-container>' \
+                       '    <div class=cp-title>' \
+                       '        {}' \
+                       '    </div>' \
+                       '    <div class=cyberchancelier-cp-container>' \
+                       '        {}' \
+                       '    </div>' \
+                       '    <div class=description-cp-container>' \
+                       '        {}' \
+                       '    </div>' \
+                       '    <div class=update-cp-container>' \
+                       '        <a href={}/cyberparlements/{}/update>' \
+                       '            <button class=btn-cp>' \
+                       '                <i class="fas fa-pencil-alt"></i>' \
+                       '            </button>' \
+                       '        </a>' \
+                       '    </div>' \
+                       '    <div class=member-list-cp-container>' \
+                       '        <a href={}/cyberparlements/{}/members>' \
+                       '            <button class=btn-cp>' \
+                       '                <i class="fas fa-users"></i>' \
+                       '            </button>' \
+                       '        </a>' \
+                       '    </div>'.format(node['nom'], node['cyberchancelier'],
+                                           node['description'] if node['description'] else '',
+                                           url, node['idcyberparlement'],
+                                           url, node['idcyberparlement'])
             print_tree(node['enfant'])
             content += '</div>'
         content += '</div>'
@@ -59,7 +76,8 @@ def get_cyberchancelier_list():
     return [{'person': person,
              'idcyberparlement': member['cyberparlement_id']}
             for person in persons for member in members
-            if member['personne_id'] == person['idpersonne'] and member['rolemembrecyberparlement'] == ROLE_CYBERCHANCELIER_KEY]
+            if member['personne_id'] == person['idpersonne']
+            and member['rolemembrecyberparlement'] == ROLE_CYBERCHANCELIER_KEY]
 
 
 def get_cyberparlement_list():
