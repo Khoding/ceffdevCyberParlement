@@ -1,12 +1,14 @@
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView, ListView, UpdateView, DeleteView
+from django.views.generic import TemplateView, ListView, UpdateView, DeleteView, CreateView
 from .models import Cyberparlement, Membrecp, Personne, ROLE_MEMBER_KEY, ROLE_CYBERCHANCELIER_KEY
-from .forms import CyberparlementChangeForm
+from .forms import CyberparlementChangeForm, CyberparlementCreationForm
 
 import json
 
 url = 'http://127.0.0.1:8000'
 content = ''
+content_move = ''
 
 
 class IndexView(ListView):
@@ -15,59 +17,54 @@ class IndexView(ListView):
     model = Personne
 
 
-def parse_tree(tree, root=None):
+def parse_cyberparlement_tree(tree, root, id_cyberparlement_selected):
     res = []
     for child in tree:
-        if child['cyberparlementparent_id'] == (root['idcyberparlement'] if root is not None else None):
-            res.append(
-                {
-                    'idcyberparlement': child['idcyberparlement'],
-                    'nom': child['nom'],
-                    'description': child['description'],
-                    'cyberchancelier': child['cyberchancelier']['prenom'] + ' ' + child['cyberchancelier']['nom']
-                    if 'cyberchancelier' in child else 'Aucun cyberchancelier',
-                    'enfant': parse_tree(tree, child)
-                }
-            )
+        if (root['idcyberparlement'] if root is not None else None) != id_cyberparlement_selected:
+            if child['cyberparlementparent_id'] == (root['idcyberparlement'] if root is not None else None):
+                res.append(
+                    {
+                        'idcyberparlement': child['idcyberparlement'],
+                        'nom': child['nom'],
+                        'description': child['description'],
+                        'cyberchancelier': child['cyberchancelier']['prenom'] + ' ' + child['cyberchancelier']['nom']
+                        if 'cyberchancelier' in child else '',
+                        'enfant': parse_cyberparlement_tree(tree, child, id_cyberparlement_selected)
+                    }
+                )
     return res if res else None
 
 
-def print_tree(tree):
+def print_cyberparlement_list_tree(tree, renderer):
     global content
     if tree is not None and len(tree) > 0:
         content += '<div class=cp-list-container>'
         for node in tree:
-            content += '<div class=cp-container>' \
-                       '    <div class=cp-title>' \
-                       '        {}' \
-                       '    </div>' \
-                       '    <div class=cyberchancelier-cp-container>' \
-                       '        {}' \
-                       '    </div>' \
-                       '    <div class=description-cp-container>' \
-                       '        {}' \
-                       '    </div>' \
-                       '    <div class=update-cp-container>' \
-                       '        <a href={}/cyberparlements/{}/update>' \
-                       '            <button class=btn-cp>' \
-                       '                <i class="fas fa-pencil-alt"></i>' \
-                       '            </button>' \
-                       '        </a>' \
-                       '    </div>' \
-                       '    <div class=member-list-cp-container>' \
-                       '        <a href={}/cyberparlements/{}/members>' \
-                       '            <button class=btn-cp>' \
-                       '                <i class="fas fa-users"></i>' \
-                       '            </button>' \
-                       '        </a>' \
-                       '    </div>'.format(node['nom'], node['cyberchancelier'],
-                                           node['description'] if node['description'] else '',
-                                           url, node['idcyberparlement'],
-                                           url, node['idcyberparlement'])
-            print_tree(node['enfant'])
+            content += renderer.format(node['nom'],
+                                       node['cyberchancelier'],
+                                       node['description'] if node['description'] else 'Aucune description',
+                                       url, node['idcyberparlement'],
+                                       url, node['idcyberparlement'],
+                                       url, node['idcyberparlement'],
+                                       url, node['idcyberparlement'])
+            print_cyberparlement_list_tree(node['enfant'], renderer)
             content += '</div>'
         content += '</div>'
     return content
+
+
+def print_cyberparlement_list_move_tree(tree, renderer):
+    global content_move
+    if tree is not None and len(tree) > 0:
+        content_move += '<div class=cp-list-container>'
+        for node in tree:
+            content_move += renderer.format(node['nom'],
+                                            node['cyberchancelier'],
+                                            node['description'] if node['description'] else 'Aucune description')
+            print_cyberparlement_list_tree(node['enfant'], renderer)
+            content_move += '</div>'
+        content_move += '</div>'
+    return content_move
 
 
 def get_cyberchancelier_list():
@@ -80,17 +77,16 @@ def get_cyberchancelier_list():
             and member['rolemembrecyberparlement'] == ROLE_CYBERCHANCELIER_KEY]
 
 
-def get_cyberparlement_list():
+def get_cyberparlement_list_printed(cyberparlement_list):
     global content
     content = ''
-    cyberparlement_list = list(Cyberparlement.objects.values())
+    renderer = render_to_string('cyberP/cyberparlements/includes/cyberparlement_container_list.html')
     cyberchancelier_list = get_cyberchancelier_list()
     for cyberparlement in cyberparlement_list:
         for cyberchancelier in cyberchancelier_list:
             if cyberparlement['idcyberparlement'] == cyberchancelier['idcyberparlement']:
                 cyberparlement['cyberchancelier'] = cyberchancelier['person']
-
-    return print_tree(parse_tree(cyberparlement_list))
+    return print_cyberparlement_list_tree(parse_cyberparlement_tree(cyberparlement_list, None, 0), renderer)
 
 
 class CyberparlementListView(TemplateView):
@@ -98,7 +94,7 @@ class CyberparlementListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['content'] = get_cyberparlement_list()
+        context['content'] = get_cyberparlement_list_printed(list(Cyberparlement.objects.values()))
         return context
 
 
@@ -153,6 +149,46 @@ class CyberparlementUpdateView(UpdateView):
         self.set_cyberchancelier()
         context = super().get_context_data(**kwargs)
         context['members'] = get_cyberparlement_member_list(self.kwargs['pk'])
+        return context
+
+
+class CyberparlementCreateView(CreateView):
+    template_name = 'cyberP/cyberparlements/cyberparlement_add.html'
+    form_class = CyberparlementCreationForm
+    model = Cyberparlement
+
+    def form_valid(self, form):
+        cyberparlementparent = Cyberparlement.objects.get(idcyberparlement=self.kwargs['pk'])
+        form.instance.cyberparlementparent = cyberparlementparent
+        return super().form_valid(form)
+
+    def get_success_url(self, *args, **kwargs):
+        return reverse_lazy("cyberP:cyberparlement-list")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cyberparlement'] = Cyberparlement.objects.get(idcyberparlement=self.kwargs['pk'])
+        return context
+
+
+class CyberparlementMoveView(TemplateView):
+    template_name = 'cyberP/cyberparlements/cyberparlement_move.html'
+
+    def get_cyberparlement_list_move_printed(self, cyberparlement_list):
+        global content_move
+        content_move = ''
+        renderer = render_to_string('cyberP/cyberparlements/includes/cyberparlement_move_container_list.html')
+        cyberchancelier_list = get_cyberchancelier_list()
+        for cyberparlement in cyberparlement_list:
+            for cyberchancelier in cyberchancelier_list:
+                if cyberparlement['idcyberparlement'] == cyberchancelier['idcyberparlement']:
+                    cyberparlement['cyberchancelier'] = cyberchancelier['person']
+        return print_cyberparlement_list_move_tree(parse_cyberparlement_tree(cyberparlement_list, None, self.kwargs['pk']), renderer)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cyberparlement'] = Cyberparlement.objects.get(idcyberparlement=self.kwargs['pk'])
+        context['content'] = self.get_cyberparlement_list_move_printed(list(Cyberparlement.objects.values()))
         return context
 
 

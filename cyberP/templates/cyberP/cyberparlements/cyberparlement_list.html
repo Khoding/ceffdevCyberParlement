@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
-    <h1>Liste des CyberParlements</h1>
-    {{ content|safe }}
+    <div class="cp-all-container">
+        <div class="title-cp-list">Liste des CyberParlements</div>
+        {{ content|safe }}
+    </div>
 {% endblock content %}
