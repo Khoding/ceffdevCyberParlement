@@ -1,13 +1,20 @@
 {% extends 'base.html' %}
 {% block content %}
-    {% for member in members %}
-        <div>
-            {{ member.prenom }} {{ member.nom }}
-            {% if member.role != cyberchancelier %}
-                <a href="{% url 'cyberP:cyberparlement-member-confirm-delete' pk=member.idmembrecyberparlement %}">
-                    <button>Ban</button>
-                </a>
-            {% endif %}
-        </div>
-    {% endfor %}
+    <div class="cp-all-container">
+        <div class="title-cp">Membres de <b>{{ cyberparlement.nom }}</b></div>
+        {% for member in members %}
+            <div class="member-container">
+                <div class="member-name">
+                    {{ member.prenom }} {{ member.nom }}
+                </div>
+                {% if member.role != cyberchancelier %}
+                    <div class="btn-ban-container">
+                        <a href="{% url 'cyberP:cyberparlement-member-confirm-delete' pk=member.idmembrecyberparlement %}">
+                            <button class="btn-ban">Ban</button>
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}

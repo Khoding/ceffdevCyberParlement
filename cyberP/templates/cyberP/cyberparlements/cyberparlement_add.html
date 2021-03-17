@@ -1,14 +1,20 @@
 {% extends 'base.html' %}
 {% block content %}
-    <h1>Création d'un nouveau cyberparlement dans {{ cyberparlement.nom }}</h1>
-    <form method="post">
-        {% csrf_token %}
-        {% for field in form %}
-            {{ field.label_tag }}
-            {{ field }}
-            <br>
-        {% endfor %}
-        <br>
-        <input type="submit" value="Modifier">
-    </form>
+    <div class="cp-all-container">
+        <div class="title-cp">Création d'un cyberparlement dans <b>{{ cyberparlement.nom }}</b></div>
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="field-container">
+                    <div class="label">
+                        {{ field.label }}
+                    </div>
+                    {{ field }}
+                </div>
+            {% endfor %}
+            <div class="btn-save-container">
+                <input class="btn-save" type="submit" value="Ajouter">
+            </div>
+        </form>
+    </div>
 {% endblock content %}

@@ -1,7 +1,20 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
+    <button id="cp-move-submit">Déplacer</button>
     <div class="cp-all-container">
         <h1>Déplacement de {{ cyberparlement.nom }}</h1>
         {{ content|safe }}
     </div>
+
+    <script type="text/javascript">
+        let submit = document.getElementById("cp-move-submit")
+        submit.style.visibility = 'hidden'
+        let cyberparlement_id = null
+
+        function getCyberparlementSelected(value) {
+            cyberparlement_id = value
+            submit.style.visibility = 'visible'
+        }
+    </script>
 {% endblock content %}

@@ -6,7 +6,7 @@
 }
 
 body {
-    background: rgb(229, 229, 229);
+    background: #646464;
     /*filter: invert(1) hue-rotate(180deg);*/
 }
 
@@ -14,14 +14,18 @@ body {
     background: rgb(255, 255, 255);
     max-width: 1250px;
     margin: auto;
-    border-right: solid rgb(0, 0, 0) 3px;
-    border-left: solid rgb(0, 0, 0) 3px;
-    border-bottom: solid rgb(0, 0, 0) 3px;
+    min-height: 100vh;
 }
 
 .cp-all-container {
     max-width: 1150px;
     margin: auto;
+}
+
+.title-cp {
+    font-size: 40px;
+    margin-bottom: 50px;
+    padding-top: 40px;
 }
 
 .title-cp-list {
@@ -32,10 +36,9 @@ body {
 }
 
 .cp-container {
-    padding: 10px 2px 10px 2px;
+    padding: 10px 8px 10px 8px;
     border: solid 1px black;
     margin-bottom: 10px;
-    border-radius: 10px;
 }
 
 .cp-element-container {
@@ -62,11 +65,12 @@ body {
     font-size: 22px;
     grid-area: cp-c;
     margin-left: 30px;
+    color: #646464;
     transition: color 1s;
 }
 
 .cyberchancelier-cp-container:hover {
-    color: goldenrod;
+    color: #daa520;
 }
 
 .description-cp-container {
@@ -100,15 +104,101 @@ body {
     margin-left: 5px;
     margin-right: 5px;
     background-color: white;
-    border: solid black 2px;
-    color: black;
+    border: solid #646464 2px;
+    color: #646464;
     transition: all 0.5s;
-    border-radius: 8px
 }
 
 .btn-cp:hover {
-    background-color: black;
+    background-color: #646464;
     color: white;
+}
+
+.label {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.field-container input {
+    font-size: 20px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.field-container select {
+    margin-bottom: 20px;
+    font-size: 20px;
+    width: 30%;
+    display: inline;
+}
+
+.btn-cyberchancelier-choice {
+    font-size: 20px;
+    width: 50%;
+    height: 40px;
+    color: white;
+    border: solid #646464 2px;
+    background-color: #646464;
+    transition: all 0.5s;
+    margin-bottom: 10px;
+}
+
+.btn-cyberchancelier-choice:hover {
+    background-color: black;
+    border-color: black;
+}
+
+.btn-save {
+    font-size: 22px;
+    width: 50%;
+    height: 40px;
+    color: white;
+    border: solid black 2px;
+    background-color: black;
+    transition: all 0.5s;
+}
+
+.btn-save:hover {
+    color: black;
+    background-color: white;
+}
+
+.user-label {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.user-field select {
+    font-size: 20px;
+    display: block;
+    width: 30%;
+    margin-bottom: 20px;
+}
+
+.member-container {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 11fr 1fr;
+    border: solid black 1px;
+    margin-bottom: 20px;
+}
+
+.member-name {
+    font-size: 20px;
+}
+
+.btn-ban {
+    font-size: 22px;
+    width: 90px;
+    height: 30px;
+    color: white;
+    border: solid black 2px;
+    background-color: black;
+    transition: all 0.3s;
+}
+
+.btn-ban:hover {
+    background-color: #d60000;
 }
 
 /*.btn-add:hover {*/
