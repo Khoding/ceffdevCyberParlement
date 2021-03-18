@@ -2,7 +2,8 @@ from django.http import JsonResponse, request
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, ListView, UpdateView, DeleteView, CreateView
-from .models import Cyberparlement, Membrecp, Personne, ROLE_MEMBER_KEY, ROLE_CYBERCHANCELIER_KEY
+from .models import Cyberparlement, Membrecp, Personne, ROLE_MEMBER_KEY, ROLE_CYBERCHANCELIER_KEY, \
+    STATUS_POSTED_KEY, STATUS_DRAFT_KEY, VISIBILITY_PUBLIC_KEY, VISIBILITY_PRIVATE_KEY, VISIBILITY_PUBLIC_VALUE, VISIBILITY_PRIVATE_VALUE
 from .forms import CyberparlementChangeForm, CyberparlementCreationForm
 
 import json
@@ -10,17 +11,6 @@ import json
 url = 'http://127.0.0.1:8000'
 content = ''
 content_move = ''
-
-
-class IndexView(ListView):
-    template_name = 'cyberP/index.html'
-    context_object_name = 'personnes'
-    model = Personne
-
-    def post(self, *args, **kwargs):
-        data = json.loads(self.request.body.decode('utf-8'))
-        self.request.session['user_id'] = data['person_selected_id']
-        return JsonResponse(data)
 
 
 def parse_cyberparlement_tree(tree, root, id_cyberparlement_selected):
@@ -33,6 +23,8 @@ def parse_cyberparlement_tree(tree, root, id_cyberparlement_selected):
                         'idcyberparlement': child['idcyberparlement'],
                         'nom': child['nom'],
                         'description': child['description'],
+                        'statut': child['statut'],
+                        'visibilite': child['visibilite'],
                         'cyberchancelier': child['cyberchancelier']['prenom'] + ' ' + child['cyberchancelier']['nom']
                         if 'cyberchancelier' in child else '',
                         'enfant': parse_cyberparlement_tree(tree, child, id_cyberparlement_selected)
@@ -46,8 +38,14 @@ def print_cyberparlement_list_tree(tree, renderer):
     if tree is not None and len(tree) > 0:
         content += '<div class=cp-list-container>'
         for node in tree:
-            content += renderer.format(node['nom'],
+            content += renderer.format('#f2f2f2'
+                                       if node['statut'] == STATUS_DRAFT_KEY else '#fffff',
+                                       node['nom'],
                                        node['cyberchancelier'],
+                                       VISIBILITY_PUBLIC_VALUE
+                                       if node['visibilite'] == VISIBILITY_PUBLIC_KEY else VISIBILITY_PRIVATE_VALUE,
+                                       '<i class="fas fa-eye"></i>'
+                                       if node['visibilite'] == VISIBILITY_PUBLIC_KEY else '<i class="fas fa-lock"></i>',
                                        node['description'] if node['description'] else 'Aucune description',
                                        url, node['idcyberparlement'],
                                        url, node['idcyberparlement'],
@@ -96,20 +94,6 @@ def get_cyberparlement_list_printed(cyberparlement_list):
     return print_cyberparlement_list_tree(parse_cyberparlement_tree(cyberparlement_list, None, 0), renderer)
 
 
-def get_cyberparlement_list():
-    return list(Cyberparlement.objects.order_by('nom').values())
-
-
-class CyberparlementListView(TemplateView):
-    template_name = 'cyberP/cyberparlements/cyberparlement_list.html'
-
-    def get_context_data(self, **kwargs):
-        print(self.request.session['user_id'] if 'user_id' in self.request.session else None)
-        context = super().get_context_data(**kwargs)
-        context['content'] = get_cyberparlement_list_printed(get_cyberparlement_list())
-        return context
-
-
 def get_cyberparlement_children(tree, id_cyberparlement):
     res = []
     for node in tree:
@@ -130,7 +114,47 @@ def get_cyberparlement_member_list(idcyberparlement):
             cyberparlement_members = list(Membrecp.objects.filter(cyberparlement=cyberparlement['idcyberparlement']).values())
             if cyberparlement_members is not None:
                 members.extend(cyberparlement_members)
-    return [person for person in persons for member in members if member['personne_id'] == person['idpersonne']]
+    persons = [person for person in persons for member in members if member['personne_id'] == person['idpersonne']]
+    return [dict(t) for t in {tuple(d.items()) for d in persons if d}]
+
+
+def get_user_cyberparlement_list(id_user):
+    cyberparlements = list(Cyberparlement.objects.order_by('nom').values())
+    user_cyberparlement_list = []
+    for cyberparlement in cyberparlements:
+        for cyberparlement_member in get_cyberparlement_member_list(cyberparlement['idcyberparlement']):
+            if cyberparlement_member['idpersonne'] == id_user:
+                user_cyberparlement_list.append(cyberparlement)
+                try:
+                    if Membrecp.objects.get(
+                            cyberparlement=cyberparlement['idcyberparlement'],
+                            personne=cyberparlement_member['idpersonne']).rolemembrecyberparlement == ROLE_CYBERCHANCELIER_KEY:
+                        cyberparlement_children = get_cyberparlement_children(cyberparlements, cyberparlement['idcyberparlement'])
+                        if cyberparlement_children is not None:
+                            user_cyberparlement_list.extend(cyberparlement_children)
+                except Membrecp.DoesNotExist:
+                    pass
+    return sorted([dict(t) for t in {tuple(d.items()) for d in user_cyberparlement_list if d}], key=lambda k: k['nom'])
+
+
+class IndexView(ListView):
+    template_name = 'cyberP/index.html'
+    context_object_name = 'personnes'
+    model = Personne
+
+    def post(self, *args, **kwargs):
+        data = json.loads(self.request.body.decode('utf-8'))
+        self.request.session['id_user'] = data['person_selected_id']
+        return JsonResponse(data)
+
+
+class CyberparlementListView(TemplateView):
+    template_name = 'cyberP/cyberparlements/cyberparlement_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['content'] = get_cyberparlement_list_printed(get_user_cyberparlement_list(int(self.request.session['id_user'])))
+        return context
 
 
 class CyberparlementUpdateView(UpdateView):
@@ -219,13 +243,15 @@ class CyberparlementMoveView(TemplateView):
             for cyberchancelier in cyberchancelier_list:
                 if cyberparlement['idcyberparlement'] == cyberchancelier['idcyberparlement']:
                     cyberparlement['cyberchancelier'] = cyberchancelier['person']
+        for cyberparlement in cyberparlement_list:
+            if cyberparlement['idcyberparlement'] == self.kwargs['pk']:
+                cyberparlement_list.remove(cyberparlement)
         return print_cyberparlement_list_move_tree(parse_cyberparlement_tree(cyberparlement_list, None, self.kwargs['pk']), renderer)
 
     def set_new_parent(self, parent_id):
-        if int(parent_id) != self.kwargs['pk']:
-            cyberparlement = Cyberparlement.objects.get(idcyberparlement=self.kwargs['pk'])
-            cyberparlement.cyberparlementparent_id = parent_id
-            cyberparlement.save()
+        cyberparlement = Cyberparlement.objects.get(idcyberparlement=self.kwargs['pk'])
+        cyberparlement.cyberparlementparent_id = parent_id
+        cyberparlement.save()
 
     def post(self, *args, **kwargs):
         data = json.loads(self.request.body.decode('utf-8'))
@@ -235,7 +261,7 @@ class CyberparlementMoveView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['cyberparlement'] = Cyberparlement.objects.get(idcyberparlement=self.kwargs['pk'])
-        context['content'] = self.get_cyberparlement_list_move_printed(list(Cyberparlement.objects.order_by('nom').values()))
+        context['content'] = self.get_cyberparlement_list_move_printed(get_user_cyberparlement_list(int(self.request.session['id_user'])))
         return context
 
 
@@ -245,7 +271,6 @@ class MemberListView(TemplateView):
     def get_cyberparlement_member_list_with_rules(self):
         persons = get_cyberparlement_member_list(self.kwargs['pk'])
         members = list(Membrecp.objects.values())
-
         for member in members:
             for person in persons:
                 if person['idpersonne'] == member['personne_id']:

@@ -2,12 +2,21 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
+    /*font-family: Arial, Helvetica, sans-serif;*/
+    font-family: Montserrat, sans-serif;
 }
 
 body {
     background: #646464;
     /*filter: invert(1) hue-rotate(180deg);*/
+}
+
+button {
+    cursor: pointer;
+}
+
+input[type=submit] {
+    cursor: pointer;
 }
 
 .base-container {
@@ -46,7 +55,7 @@ body {
     grid-template-columns: 12fr 1fr 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr;
     grid-template-areas:
-            "cp-n . . . cp-c"
+            "cp-n . . cp-v cp-c"
             "cp-d cp-u cp-ml cp-a cp-mo";
 }
 
@@ -71,6 +80,15 @@ body {
 
 .cyberchancelier-cp-container:hover {
     color: #daa520;
+}
+
+.visibility-cp-container {
+    font-size: 18px;
+    grid-area: cp-v;
+    margin-left: 45px;
+    padding-top: 3px;
+    color: #646464;
+    transition: color 1s;
 }
 
 .description-cp-container {
@@ -134,23 +152,23 @@ body {
 
 .btn-cyberchancelier-choice {
     font-size: 20px;
-    width: 50%;
-    height: 40px;
+    width: 200px;
+    height: 60px;
     color: white;
     border: solid #646464 2px;
     background-color: #646464;
-    transition: all 0.5s;
-    margin-bottom: 10px;
+    transition: all 0.3s;
+    margin-bottom: 20px;
 }
 
 .btn-cyberchancelier-choice:hover {
-    background-color: black;
-    border-color: black;
+    background-color: #3b3b3b;
+    border-color: #3b3b3b;
 }
 
 .btn-save {
     font-size: 22px;
-    width: 50%;
+    width: 400px;
     height: 40px;
     color: white;
     border: solid black 2px;
@@ -175,12 +193,16 @@ body {
     margin-bottom: 20px;
 }
 
+.member-list-container {
+    padding-bottom: 20px;
+}
+
 .member-container {
     padding: 20px;
     display: grid;
-    grid-template-columns: 11fr 1fr;
+    grid-template-columns: 12fr 1fr;
     border: solid black 1px;
-    margin-bottom: 20px;
+    margin-bottom: 5px;
 }
 
 .member-name {
@@ -188,8 +210,8 @@ body {
 }
 
 .btn-ban {
-    font-size: 22px;
-    width: 90px;
+    font-size: 18px;
+    width: 70px;
     height: 30px;
     color: white;
     border: solid black 2px;
@@ -201,20 +223,75 @@ body {
     background-color: #d60000;
 }
 
-/*.btn-add:hover {*/
-/*    background-color: darkgreen;*/
-/*    color: lightgreen;*/
-/*    border-color: darkgreen;*/
-/*}*/
+.modal {
+    position: relative;
+}
 
-/*.btn-update:hover {*/
-/*    background-color: darkorange;*/
-/*    color: lightgoldenrodyellow;*/
-/*    border-color: darkorange;*/
-/*}*/
+.modal-bg {
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s, opacity 0.5s;
+}
 
-/*.btn-members:hover {*/
-/*    background-color: darkblue;*/
-/*    color: lightskyblue;*/
-/*    border-color: darkblue;*/
-/*}*/
+.bg-active {
+    visibility: visible;
+    opacity: 1;
+}
+
+.modal-close {
+    position: absolute;
+    font-size: 20px;
+    top: 10px;
+    right: 17px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.modal-cyberchancelier-choice {
+    background-color: white;
+    width: 800px;
+    height: 40vh;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: column;
+}
+
+.title-cyberchancelier-choice {
+    font-size: 30px;
+}
+
+.cyberchancelier-label {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.cyberchancelier-field select {
+    font-size: 20px;
+    display: block;
+    width: 400px;
+    margin-bottom: 20px;
+}
+
+.btn-cyberchancelier-save {
+    font-size: 22px;
+    width: 400px;
+    height: 40px;
+    color: white;
+    border: solid black 2px;
+    background-color: black;
+}
+
+.btn-cyberchancelier-save:hover {
+    background-color: white;
+    color: black;
+}
