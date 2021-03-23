@@ -2,13 +2,11 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    /*font-family: Arial, Helvetica, sans-serif;*/
     font-family: Montserrat, sans-serif;
 }
 
 body {
     background: #646464;
-    /*filter: invert(1) hue-rotate(180deg);*/
 }
 
 button {
@@ -44,23 +42,75 @@ input[type=submit] {
     text-align: center;
 }
 
+.cp-element-container {
+    display: grid;
+    grid-template-columns: 24fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    grid-template-areas:
+            "cp-n cp-s cp-v cp-c cp-h"
+            "cp-d cp-d cp-d cp-d .";
+}
+
+.cp-move-element-container {
+    display: grid;
+    grid-template-columns: 26fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    grid-template-areas:
+            "cp-n cp-c"
+            "cp-d cp-d";
+    cursor: pointer;
+}
+
+#cp-move-btn-container {
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    left: 0;
+    text-align: center;
+    background-color: white;
+    border-top: solid #646464 2px;
+}
+
+#cp-move-submit {
+    background-color: white;
+    color: #646464;
+    border: solid 1px #646464;
+    height: 50px;
+    width: 80%;
+    margin: 10px;
+    font-size: 20px;
+    transition: 0.5s
+}
+
+#cp-move-submit:hover {
+    background-color: #646464;
+    color: white;
+}
+
+.hidden {
+    display: none;
+}
+
+.visible {
+    display: block;
+}
+
+.bg-default {
+    background-color: white;
+}
+
+.cp-list-container {
+    margin: 5px;
+}
+
 .cp-container {
-    padding: 10px 8px 10px 8px;
+    padding: 15px;
     border: solid 1px black;
     margin-bottom: 10px;
 }
 
-.cp-element-container {
-    display: grid;
-    grid-template-columns: 12fr 1fr 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    grid-template-areas:
-            "cp-n . . cp-v cp-c"
-            "cp-d cp-u cp-ml cp-a cp-mo";
-}
-
-.cp-list-container {
-    padding: 5px;
+.bg-selected {
+    background-color: #cafaef;
 }
 
 .cp-name {
@@ -69,11 +119,16 @@ input[type=submit] {
     grid-area: cp-n;
 }
 
+.hide-cp-container {
+    grid-area: cp-h;
+    font-size: 20px;
+    cursor: pointer;
+}
+
 .cyberchancelier-cp-container {
     margin-right: 8px;
-    font-size: 22px;
+    font-size: 20px;
     grid-area: cp-c;
-    margin-left: 30px;
     color: #646464;
     transition: color 1s;
 }
@@ -83,12 +138,17 @@ input[type=submit] {
 }
 
 .visibility-cp-container {
+    padding-top: 3px;
     font-size: 18px;
     grid-area: cp-v;
-    margin-left: 45px;
-    padding-top: 3px;
     color: #646464;
-    transition: color 1s;
+}
+
+.status-cp-container {
+    padding-top: 3px;
+    font-size: 18px;
+    grid-area: cp-s;
+    color: #646464;
 }
 
 .description-cp-container {
@@ -99,28 +159,16 @@ input[type=submit] {
     grid-area: cp-d;
 }
 
-.update-cp-container {
-    grid-area: cp-u;
-}
-
-.member-list-cp-container {
-    grid-area: cp-ml;
-}
-
-.add-cp-container {
-    grid-area: cp-a;
-}
-
-.move-cp-container {
-    grid-area: cp-mo;
+.cp-btn-container {
+    display: grid;
+    text-align: center;
 }
 
 .btn-cp {
     font-size: 18px;
-    width: 60px;
-    height: 28px;
-    margin-left: 5px;
-    margin-right: 5px;
+    width: 99%;
+    margin-bottom: 5px;
+    height: 40px;
     background-color: white;
     border: solid #646464 2px;
     color: #646464;
@@ -139,8 +187,12 @@ input[type=submit] {
 
 .field-container input {
     font-size: 20px;
-    width: 100%;
+    width: 30%;
     margin-bottom: 20px;
+}
+
+#id_description {
+    width: 70%;
 }
 
 .field-container select {
@@ -294,4 +346,25 @@ input[type=submit] {
 .btn-cyberchancelier-save:hover {
     background-color: white;
     color: black;
+}
+
+/* width */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #646464;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: white;
+    border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #d2d2d2;
 }

@@ -1,20 +1,26 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-    <button id="cp-move-submit">Déplacer</button>
+    <div id="cp-move-btn-container">
+        <button id="cp-move-submit"></button>
+    </div>
     <div class="cp-all-container">
-        <h1>Déplacement de {{ cyberparlement.nom }}</h1>
+        <div class="title-cp-list">Déplacement de <b>{{ cyberparlement.nom }}</b></div>
         {{ content|safe }}
     </div>
 
     <script type="text/javascript">
+        let submitContainer = document.getElementById("cp-move-btn-container")
         let submit = document.getElementById("cp-move-submit")
-        submit.style.visibility = 'hidden'
-        let cyberparlement_id = null
 
-        function getCyberparlementSelected(value) {
-            cyberparlement_id = value
-            submit.style.visibility = 'visible'
+        submitContainer.style.visibility = 'hidden'
+        let cyberparlementID = null
+
+        function setCyberparlementSelected(element) {
+            let parent = (element.parentElement).parentElement
+            cyberparlementID = element.value
+            submitContainer.style.visibility = 'visible'
+            submit.innerHTML = 'Déplacer dans <b>' + (parent.children[0]).children[0].textContent + '</b>'
         }
     </script>
 {% endblock content %}

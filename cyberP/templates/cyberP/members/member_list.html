@@ -4,18 +4,18 @@
         <div class="title-cp">Membres de <b>{{ cyberparlement.nom }}</b></div>
         <div class="member-list-container">
             {% for member in members %}
-                <div class="member-container">
-                    <div class="member-name">
-                        {{ member.prenom }} {{ member.nom }}
-                    </div>
-                    {% if member.role != cyberchancelier %}
+                {% if member.role != cyberchancelier %}
+                    <div class="member-container">
+                        <div class="member-name">
+                            {{ member.prenom }} {{ member.nom }}
+                        </div>
                         <div class="btn-ban-container">
                             <a href="{% url 'cyberP:cyberparlement-member-confirm-delete' pk=member.idmembrecyberparlement %}">
                                 <button class="btn-ban"><i class="fas fa-user-slash"></i></button>
                             </a>
                         </div>
-                    {% endif %}
-                </div>
+                    </div>
+                {% endif %}
             {% endfor %}
         </div>
     </div>

@@ -1,10 +1,5 @@
 <div class="cp-container">
     <div class="cp-move-element-container">
-        <div class="cp-move-selected">
-            <button value="{{ cyberparlement.idcyberparlement }}" onclick="getCyberparlementSelected(this.value)" class=btn-cp>
-                <i class="fas fa-check-circle"></i>
-            </button>
-        </div>
         <div class=cp-name>{{ cyberparlement.nom }}</div>
         <div class=cyberchancelier-cp-container title="{{ cyberparlement.cyberchancelier.prenom }} {{ cyberparlement.cyberchancelier.nom }}">
             <i class="fas fa-crown"></i>
@@ -14,4 +9,9 @@
         {% else %}
             <div class=description-cp-container>Aucune description</div>
         {% endif %}
+    </div>
+    <div class="cp-move-selected">
+        <button value="{{ cyberparlement.idcyberparlement }}" onclick="setCyberparlementSelected(this)" class=btn-cp>
+            <i class="fas fa-check-circle"></i> Sélectionner
+        </button>
     </div>

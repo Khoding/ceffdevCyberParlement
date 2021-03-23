@@ -54,14 +54,12 @@ STATUS_CHOICES = [
 
 
 class Cyberparlement(models.Model):
-    idcyberparlement = models.AutoField(db_column='idCyberParlement', primary_key=True)  # Field name made lowercase.
-    nom = models.CharField(db_column='Nom', max_length=45)  # Field name made lowercase.
-    description = models.CharField(db_column='Description', max_length=200, blank=True, null=True)  # Field name made lowercase.
-    # visibilite = models.CharField(db_column='Visibilite', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    # statut = models.ForeignKey('Statutensemble', models.DO_NOTHING, db_column='Statut', blank=True, null=True)  # Field name made lowercase.
+    idcyberparlement = models.AutoField(db_column='idCyberParlement', primary_key=True)
+    nom = models.CharField(db_column='Nom', max_length=45)
+    description = models.CharField(db_column='Description', max_length=100, blank=True, null=True)
     visibilite = models.CharField(db_column='Visibilite', max_length=200, choices=VISIBILITY_CHOICES, default=VISIBILITY_PUBLIC_KEY, verbose_name='Visibilité')
     statut = models.CharField(db_column='Statutensemble', max_length=200, choices=STATUS_CHOICES, default=STATUS_DRAFT_KEY)
-    cyberparlementparent = models.ForeignKey('self', models.DO_NOTHING, db_column='CPParent', blank=True, null=True)  # Field name made lowercase.
+    cyberparlementparent = models.ForeignKey('self', models.DO_NOTHING, db_column='CPParent', blank=True, null=True)
 
     class Meta:
         managed = True

@@ -4,4 +4,24 @@
         <div class="title-cp-list">Liste des <b>CyberParlements</b></div>
         {{ content|safe }}
     </div>
+    <script type="text/javascript">
+        function hideChildren(element) {
+            let parent = (element.parentElement).parentElement
+            let cybeberparlementChildren = parent.children[2]
+            let elementContainer = parent.children[0]
+            let hideIcon = elementContainer.children[5]
+            console.log(hideIcon)
+            if (cybeberparlementChildren != null) {
+                if (cybeberparlementChildren.classList.contains('hidden')) {
+                    hideIcon.innerHTML = "<i class=\"fas fa-chevron-up\"></i>"
+                    cybeberparlementChildren.classList.remove('hidden')
+                    cybeberparlementChildren.classList.add('visible')
+                } else {
+                    hideIcon.innerHTML = "<i class=\"fas fa-chevron-down\"></i>"
+                    cybeberparlementChildren.classList.remove('visible')
+                    cybeberparlementChildren.classList.add('hidden')
+                }
+            }
+        }
+    </script>
 {% endblock content %}
