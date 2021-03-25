@@ -2,6 +2,11 @@
 {% block content %}
     <div class="cp-all-container">
         <div class="title-cp-list">Liste des <b>CyberParlements</b></div>
+        <a href="{% url 'cyberP:index' %}">
+            <button class="btn-cp btn-change-user">
+                <i class="fas fa-user"></i> Changer d'utilisateur
+            </button>
+        </a>
         {{ content|safe }}
     </div>
     <script type="text/javascript">
@@ -10,7 +15,6 @@
             let cybeberparlementChildren = parent.children[2]
             let elementContainer = parent.children[0]
             let hideIcon = elementContainer.children[5]
-            console.log(hideIcon)
             if (cybeberparlementChildren != null) {
                 if (cybeberparlementChildren.classList.contains('hidden')) {
                     hideIcon.innerHTML = "<i class=\"fas fa-chevron-up\"></i>"

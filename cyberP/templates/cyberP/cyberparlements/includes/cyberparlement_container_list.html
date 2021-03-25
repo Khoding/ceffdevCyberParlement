@@ -1,21 +1,24 @@
 <div class=cp-container>
     <div class="cp-element-container">
         <div class=cp-name>{{ cyberparlement.nom }}</div>
-        <div class=cyberchancelier-cp-container title="{{ cyberparlement.cyberchancelier.prenom }} {{ cyberparlement.cyberchancelier.nom }}">
+        <div class="cyberchancelier-cp-container tooltip">
             <i class="fas fa-crown"></i>
+            <span class="tooltiptext">{{ cyberparlement.cyberchancelier.prenom }} {{ cyberparlement.cyberchancelier.nom }}</span>
         </div>
         <div class="status-cp-container" title="Brouillon">
-            {% if cyberparlement.statut == draftstatus %}
+            {% if cyberparlement.statut == draftstatuskey %}
                 <i class="fas fa-exclamation-circle"></i>
             {% endif %}
         </div>
-        <div class="visibility-cp-container" title="{{ cyberparlement.visibilite }}">
-            {% if cyberparlement.visibilite == privatevisibility %}
+        {% if cyberparlement.visibilite == privatevisibilitykey %}
+            <div class="visibility-cp-container" title="{{ privatevisibilityvalue }}">
                 <i class="fas fa-lock"></i>
-            {% else %}
+            </div>
+        {% else %}
+            <div class="visibility-cp-container" title="{{ publicvisibilityvalue }}">
                 <i class="fas fa-eye"></i>
-            {% endif %}
-        </div>
+            </div>
+        {% endif %}
         <div class=description-cp-container>
             {% if cyberparlement.description %}
                 {{ cyberparlement.description }}
@@ -51,7 +54,7 @@
                         </button>
                     </a>
                 </div>
-                {% if cyberparlement.statut == draftstatus and cyberparlement.cyberparlementparent_id != None %}
+                {% if cyberparlement.statut == draftstatuskey and cyberparlement.cyberparlementparent_id != None %}
                     <div class=move-cp-container>
                         <a href="{% url 'cyberP:cyberparlement-move' pk=cyberparlement.idcyberparlement|add:"0" %}">
                             <button class="btn-cp btn-add" title="Déplacer le cyberparlement">

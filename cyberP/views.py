@@ -1,6 +1,6 @@
-from django.http import JsonResponse, request
+from django.http import JsonResponse, request, HttpResponseRedirect
 from django.template.loader import render_to_string
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.generic import TemplateView, ListView, UpdateView, DeleteView, CreateView
 from .models import Cyberparlement, Membrecp, Personne, ROLE_MEMBER_KEY, ROLE_CYBERCHANCELIER_KEY, \
     STATUS_POSTED_KEY, STATUS_DRAFT_KEY, VISIBILITY_PUBLIC_KEY, VISIBILITY_PRIVATE_KEY, VISIBILITY_PUBLIC_VALUE, VISIBILITY_PRIVATE_VALUE
@@ -11,9 +11,9 @@ import json
 content = ''
 
 
-def get_cleaned_data(l):
+def cleaned_data(l):
     """
-    méthode retournant la liste mise en paramètre
+    fonction retournant la liste mise en paramètre
     sans doublon et ordonné par nom
     """
     return sorted([dict(t) for t in {tuple(d.items()) for d in l if d}], key=lambda k: k['nom'])
@@ -21,7 +21,7 @@ def get_cleaned_data(l):
 
 def get_cyberchancelier_list():
     """
-    Méthode retournant tous les cyberchanceliers
+    fonction retournant tous les cyberchanceliers
     """
     members = list(Membrecp.objects.values())
     persons = list(Personne.objects.values())
@@ -34,7 +34,7 @@ def get_cyberchancelier_list():
 
 def get_cyberparlement_parent(cyberparlements, id_cyberparlementparent):
     """
-    méthode récursive retournant tous les
+    fonction récursive retournant tous les
     cyberparlements parents d'un cyberparlement
     """
     res = []
@@ -52,7 +52,7 @@ def get_cyberparlement_parent(cyberparlements, id_cyberparlementparent):
 
 def get_cyberparlement_children(cyberparlements, id_cyberparlement):
     """
-    méthode récursive retournant tous les
+    fonction récursive retournant tous les
     cyberparlements enfants d'un cyberparlement
     """
     res = []
@@ -70,7 +70,7 @@ def get_cyberparlement_children(cyberparlements, id_cyberparlement):
 
 def get_cyberparlement_cyberchancelier(id_cyberparlement):
     """
-    méthode retourant le cybcerchancelier
+    fonction retourant le cybcerchancelier
     d'un cyberparleent
     """
     if get_cyberchancelier_list() is not None:
@@ -82,7 +82,7 @@ def get_cyberparlement_cyberchancelier(id_cyberparlement):
 
 def get_cyberparlement_all_cyberchancelier_list(cyberparlement_selected):
     """
-    méthode retournant tous les cyberchancelier
+    fonction retournant tous les cyberchancelier
     qui ont accès à un cyberparlement
     """
     res = [get_cyberparlement_cyberchancelier(cyberparlement_selected['idcyberparlement'])]
@@ -93,12 +93,12 @@ def get_cyberparlement_all_cyberchancelier_list(cyberparlement_selected):
     if cyberparlements is not None:
         for cyberparlement in cyberparlements:
             res.append(get_cyberparlement_cyberchancelier(cyberparlement['idcyberparlement']))
-    return get_cleaned_data(res)
+    return cleaned_data(res)
 
 
 def parse_cyberparlement_tree(tree, root, id_cyberparlement_selected):
     """
-    méthode récursive retournant une liste
+    fonction récursive retournant une liste
     des cyberparlements sous forme d'arborescence
     """
     res = []
@@ -120,7 +120,7 @@ def parse_cyberparlement_tree(tree, root, id_cyberparlement_selected):
 
 def print_cyberparlement_tree(tree, template, id_user=None):
     """
-    méthode récursive retournant la liste
+    fonction récursive retournant la liste
     des cyberparlements de façon hiérarchique
     """
     global content
@@ -132,8 +132,10 @@ def print_cyberparlement_tree(tree, template, id_user=None):
                 {
                     'cyberparlement': node,
                     'iduser': id_user,
-                    'privatevisibility': VISIBILITY_PRIVATE_KEY,
-                    'draftstatus': STATUS_DRAFT_KEY
+                    'privatevisibilitykey': VISIBILITY_PRIVATE_KEY,
+                    'publicvisibilityvalue': VISIBILITY_PUBLIC_VALUE,
+                    'privatevisibilityvalue': VISIBILITY_PRIVATE_VALUE,
+                    'draftstatuskey': STATUS_DRAFT_KEY
                 }
             )
             print_cyberparlement_tree(
@@ -148,7 +150,7 @@ def print_cyberparlement_tree(tree, template, id_user=None):
 
 def get_cyberparlement_member_list(id_cyberparlement):
     """
-    méthode retournant une liste de
+    fonction retournant une liste de
     tous les membres d'un cyberparlement
     """
     members = list(Membrecp.objects.filter(cyberparlement=id_cyberparlement).values())
@@ -160,12 +162,12 @@ def get_cyberparlement_member_list(id_cyberparlement):
             if cyberparlement_members is not None:
                 members.extend(cyberparlement_members)
     persons = [person for person in persons for member in members if member['personne_id'] == person['idpersonne']]
-    return get_cleaned_data(persons)
+    return cleaned_data(persons)
 
 
 def get_user_cyberparlement_list(id_user):
     """
-    méthode retournant une liste de tous
+    fonction retournant une liste de tous
     les cyberparlements que l'utilisateur a accès
     """
     cyberparlements = list(Cyberparlement.objects.order_by('nom').values())
@@ -183,7 +185,7 @@ def get_user_cyberparlement_list(id_user):
                             user_cyberparlement_list.extend(cyberparlement_children)
                 except Membrecp.DoesNotExist:
                     pass
-    return get_cleaned_data(user_cyberparlement_list)
+    return cleaned_data(user_cyberparlement_list)
 
 
 class IndexView(ListView):
@@ -198,7 +200,7 @@ class IndexView(ListView):
     def post(self, *args, **kwargs):
         data = json.loads(self.request.body.decode('utf-8'))
         self.request.session['id_user'] = data['person_selected_id']
-        return JsonResponse(data)
+        return HttpResponseRedirect(reverse('cyberP:cyberparlement-list'))
 
 
 class CyberparlementListView(TemplateView):
@@ -216,9 +218,8 @@ class CyberparlementListView(TemplateView):
         """
         global content
         content = ''
-        cyberchancelier_list = get_cyberchancelier_list()
         for cyberparlement in cyberparlement_list:
-            for cyberchancelier in cyberchancelier_list:
+            for cyberchancelier in get_cyberchancelier_list():
                 if cyberparlement['idcyberparlement'] == cyberchancelier['idcyberparlement']:
                     cyberparlement['cyberchancelier'] = cyberchancelier['person']
         return print_cyberparlement_tree(
@@ -229,11 +230,14 @@ class CyberparlementListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['content'] = self.get_cyberparlement_list_printed(
-            get_user_cyberparlement_list(
-                int(self.request.session['id_user'])
+        if 'id_user' in self.request.session:
+            context['content'] = self.get_cyberparlement_list_printed(
+                get_user_cyberparlement_list(
+                    int(self.request.session['id_user'])
+                )
             )
-        )
+        else:
+            context['content'] = "Sélectionnez un utilisateur"
         return context
 
 
@@ -344,9 +348,8 @@ class CyberparlementMoveView(TemplateView):
         """
         global content
         content = ''
-        cyberchancelier_list = get_cyberchancelier_list()
         for cyberparlement in cyberparlement_list:
-            for cyberchancelier in cyberchancelier_list:
+            for cyberchancelier in get_cyberchancelier_list():
                 if cyberparlement['idcyberparlement'] == cyberchancelier['idcyberparlement']:
                     cyberparlement['cyberchancelier'] = cyberchancelier['person']
         for cyberparlement in cyberparlement_list:
@@ -397,7 +400,7 @@ class MemberListView(TemplateView):
                 if person['idpersonne'] == member['personne_id']:
                     person['role'] = member['rolemembrecyberparlement']
                     person['idmembrecyberparlement'] = member['idmembrecyberparlement']
-        return get_cleaned_data(persons)
+        return cleaned_data(persons)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
