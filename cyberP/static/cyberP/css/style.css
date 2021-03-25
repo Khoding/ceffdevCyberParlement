@@ -27,19 +27,15 @@ input[type=submit] {
 .cp-all-container {
     max-width: 1150px;
     margin: auto;
+    padding: 15px;
 }
 
 .title-cp {
     font-size: 40px;
     margin-bottom: 50px;
     padding-top: 40px;
-}
-
-.title-cp-list {
-    font-size: 45px;
-    padding: 30px 0 30px 0;
-    width: 800px;
-    text-align: center;
+    margin-left: 5vw;
+    margin-right: 5vw;
 }
 
 .cp-element-container {
@@ -91,26 +87,19 @@ input[type=submit] {
     display: none;
 }
 
-.visible {
-    display: block;
-}
-
 .bg-default {
     background-color: white;
 }
 
 .cp-list-container {
     margin: 5px;
+    transition: opacity 0.5s linear;
 }
 
 .cp-container {
     padding: 15px;
     border: solid 1px black;
     margin-bottom: 10px;
-}
-
-.bg-selected {
-    background-color: #cafaef;
 }
 
 .cp-name {
@@ -191,12 +180,12 @@ input[type=submit] {
 
 .field-container input {
     font-size: 20px;
-    width: 30%;
+    width: 50%;
     margin-bottom: 20px;
 }
 
 #id_description {
-    width: 70%;
+    width: 80%;
 }
 
 .field-container select {
@@ -388,7 +377,7 @@ input[type=submit] {
     left: 50%;
     margin-left: -60px;
     opacity: 0;
-    transition: opacity 0.6s;
+    transition: opacity 0.4s;
 }
 
 .tooltip .tooltiptext::after {

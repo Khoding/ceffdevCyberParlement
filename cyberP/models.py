@@ -5,7 +5,11 @@
 #   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
+import itertools
+
 from django.db import models
+from django.db.models import Q
+from django.template.defaultfilters import slugify
 
 
 class Candidat(models.Model):
@@ -60,6 +64,25 @@ class Cyberparlement(models.Model):
     visibilite = models.CharField(db_column='Visibilite', max_length=200, choices=VISIBILITY_CHOICES, default=VISIBILITY_PUBLIC_KEY, verbose_name='Visibilité')
     statut = models.CharField(db_column='Statutensemble', max_length=200, choices=STATUS_CHOICES, default=STATUS_DRAFT_KEY)
     cyberparlementparent = models.ForeignKey('self', models.DO_NOTHING, db_column='CPParent', blank=True, null=True)
+    slug = models.SlugField(null=True, unique=True)
+
+    def __str__(self):
+        return self.nom
+    
+    def save(self, *args, **kwargs):
+        max_length = Cyberparlement._meta.get_field('slug').max_length
+        self.slug = orig = slugify(self)[:max_length]
+        for x in itertools.count(1):
+            if self.idcyberparlement:
+                if Cyberparlement.objects.filter(Q(slug=self.slug),
+                                                 Q(idcyberparlement=self.idcyberparlement),
+                                                 ).exists():
+                    break
+            if not Cyberparlement.objects.filter(slug=self.slug).exists():
+                break
+
+            self.slug = "%s-%d" % (orig[:max_length - len(str(x)) - 1], x)
+        return super().save(*args, **kwargs)
 
     class Meta:
         managed = True

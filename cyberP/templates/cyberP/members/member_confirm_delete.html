@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
     <form method="post">{% csrf_token %}
-        <div class="msg-confirm-delete">Êtes-vous sûr de vouloir exclure <b>{{ person_fullname }}</b> ?</div>
+        <div class="msg-confirm-delete">Êtes-vous sûr de vouloir exclure <b>{{ person_fullname }}</b> de <b>{{ cyberparlement.nom }}</b> ?</div>
         <div class="btn-confirm-delete-container">
             <input class="btn-save btn-confirm-delete" type="submit" value="Confirmer">
         </div>

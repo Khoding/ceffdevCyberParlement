@@ -22,9 +22,9 @@ app_name = 'cyberP'
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
     path('cyberparlements/', CyberparlementListView.as_view(), name='cyberparlement-list'),
-    path('cyberparlements/<int:pk>/update/', CyberparlementUpdateView.as_view(), name='cyberparlement-update'),
-    path('cyberparlements/<int:pk>/add/', CyberparlementCreateView.as_view(), name='cyberparlement-add'),
-    path('cyberparlements/<int:pk>/move/', CyberparlementMoveView.as_view(), name='cyberparlement-move'),
-    path('cyberparlements/<int:pk>/members/', MemberListView.as_view(), name='cyberparlement-member-list'),
-    path('members/<int:pk>/delete/', MemberDeleteView.as_view(), name='cyberparlement-member-confirm-delete'),
+    path('cyberparlements/<slug:slug>/update/', CyberparlementUpdateView.as_view(), name='cyberparlement-update'),
+    path('cyberparlements/<slug:slug>/add/', CyberparlementCreateView.as_view(), name='cyberparlement-add'),
+    path('cyberparlements/<slug:slug>/move/', CyberparlementMoveView.as_view(), name='cyberparlement-move'),
+    path('cyberparlements/<slug:slug>/members/', MemberListView.as_view(), name='cyberparlement-member-list'),
+    path('cyberparlements/<slug:slug>/members/<int:pk>/delete/', MemberDeleteView.as_view(), name='cyberparlement-member-confirm-delete'),
 ]

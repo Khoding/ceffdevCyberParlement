@@ -126,17 +126,17 @@ VALUES
 DELETE FROM MembreCP WHERE idMembreCP > 0;
 DELETE FROM CyberParlement WHERE idCyberParlement > 0;
 ALTER TABLE CyberParlement AUTO_INCREMENT = 1;
-INSERT INTO CyberParlement(idCyberParlement,Nom,CPParent,Description,Visibilite,Statutensemble) VALUES 
-(1,'CPJB', null, 'Cyberparlement du Jura bernois', 'PU','BR'),
-(2,'Tramelan',1, 'Village de Tramelan', 'PU','BR'),
-(3,'Tavannes', 1, 'Village de Tavannes', 'PU','BR'),
-(4,'Saint-Imier',1, 'Ville de Saint-Imier', 'PU','BR'),
-(5,'ES',2, null, 'PU','BR'),
-(6,'EP',2, null, 'PU','BR'),
-(7,'ES',3, null, 'PU','BR'),
-(8,'EP',3, null, 'PU','BR'),
-(9,'ES',4, null, 'PU','BR'),
-(10,'EP',4, null, 'PU','BR');
+INSERT INTO CyberParlement(idCyberParlement,Nom,CPParent,Description,Visibilite,Statutensemble,slug) VALUES 
+(1,'CPJB', null, 'Cyberparlement du Jura bernois', 'PU','BR','cpjb'),
+(2,'Tramelan',1, 'Village de Tramelan', 'PU','BR','tramelan'),
+(3,'Tavannes', 1, 'Village de Tavannes', 'PU','BR','tavannes'),
+(4,'Saint-Imier',1, 'Village de Saint-Imier', 'PU','BR','saint-imier'),
+(5,'ES',2, null, 'PU','BR','es'),
+(6,'EP',2, null, 'PU','BR','ep'),
+(7,'ES',3, null, 'PU','BR','es-1'),
+(8,'EP',3, null, 'PU','BR','ep-1'),
+(9,'ES',4, null, 'PU','BR','es-2'),
+(10,'EP',4, null, 'PU','BR','ep-2');
 
 DELETE FROM MembreCP WHERE idMembreCP > 0;
 ALTER TABLE MembreCP AUTO_INCREMENT=1;

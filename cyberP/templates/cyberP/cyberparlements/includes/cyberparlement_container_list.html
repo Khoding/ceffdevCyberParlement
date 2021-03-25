@@ -34,21 +34,21 @@
         {% if iduser|add:"0" == cyberchancelier.idpersonne %}
             <div class="cp-btn-container">
                 <div class=update-cp-container>
-                    <a href="{% url 'cyberP:cyberparlement-update' pk=cyberparlement.idcyberparlement|add:"0" %}">
+                    <a href="{% url 'cyberP:cyberparlement-update' slug=cyberparlement.slug %}">
                         <button class="btn-cp btn-update" title="Modifier le cyberparlement">
                             <i class="fas fa-pen"></i> Modifier
                         </button>
                     </a>
                 </div>
                 <div class=member-list-cp-container>
-                    <a href="{% url 'cyberP:cyberparlement-member-list' pk=cyberparlement.idcyberparlement|add:"0" %}">
+                    <a href="{% url 'cyberP:cyberparlement-member-list' slug=cyberparlement.slug %}">
                         <button class="btn-cp btn-members" title="Afficher la liste des membres du cyberparlement">
                             <i class="fas fa-users"></i> Membres
                         </button>
                     </a>
                 </div>
                 <div class=add-cp-container>
-                    <a href="{% url 'cyberP:cyberparlement-add' pk=cyberparlement.idcyberparlement|add:"0" %}">
+                    <a href="{% url 'cyberP:cyberparlement-add' slug=cyberparlement.slug %}">
                         <button class="btn-cp btn-add" title="Ajouter un cyberparlement">
                             <i class="fas fa-plus"></i> Ajouter
                         </button>
@@ -56,7 +56,7 @@
                 </div>
                 {% if cyberparlement.statut == draftstatuskey and cyberparlement.cyberparlementparent_id != None %}
                     <div class=move-cp-container>
-                        <a href="{% url 'cyberP:cyberparlement-move' pk=cyberparlement.idcyberparlement|add:"0" %}">
+                        <a href="{% url 'cyberP:cyberparlement-move' slug=cyberparlement.slug %}">
                             <button class="btn-cp btn-add" title="Déplacer le cyberparlement">
                                 <i class="fas fa-arrows-alt"></i> Déplacer
                             </button>
