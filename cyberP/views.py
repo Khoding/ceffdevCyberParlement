@@ -211,7 +211,7 @@ class IndexView(ListView):
     def post(self, *args, **kwargs):
         data = json.loads(self.request.body.decode('utf-8'))
         self.request.session['id_user'] = data['person_selected_id']
-        return HttpResponseRedirect(reverse('cyberP:cyberparlement-list'))
+        return JsonResponse(data)
 
 
 class CyberparlementListView(TemplateView):
