@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+    <h1>Nouveau tour</h1>
+    <form method="POST">
+        {% include 'cyberparlementProject/includes/form_include.html' %}
+
+        <div class="buttons d-flex flex-row justify-content-end">
+            <button type="submit" class="btn btn-primary btn-lg mt-4">Valider</button>
+        </div>
+    </form>
+{% endblock %}

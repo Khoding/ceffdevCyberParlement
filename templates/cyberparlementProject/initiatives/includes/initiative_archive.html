@@ -1,0 +1,9 @@
+<div class="card mb-2 shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title">{{ initiative.nom }}</h5>
+        <p class="card-text text-justify">{{ initiative.description }}</p>
+        <div class="d-flex flex-row justify-content-end">
+            <a href="{% url 'initiative-poll-detail' pk=initiative.id %}" class="btn btn-primary">Voir les résultats</a>
+        </div>
+    </div>
+</div>

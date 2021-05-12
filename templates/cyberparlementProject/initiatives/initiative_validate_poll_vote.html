@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if not initiative.mode_validation == initiative.MODE_VALIDATION_AUCUN %}
+        <nav class="d-flex process-flow">
+            <span class="nav-link">Vote <i class="fas fa-check"></i></span>
+            <a href="#" class="nav-link active">Validation du vote</a>
+        </nav>
+    {% endif %}
+
+    <h1>{{ initiative }}</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div class="p-3">
+            <div class="text-center">
+                <label for="validationCode">Code à 5 chiffres</label>
+            </div>
+            <div class="row mb-1">
+                <input type="text" id="validationCode" name="validationCode" class="form-control w-50 mx-auto" maxlength="5">
+            </div>
+            <div class="text-center mb-1">
+                <small class="text-center">{{ validation_text }}</small>
+            </div>
+
+            {% if initiative.mode_validation == 'email' %}
+                <div class="row  mb-3">
+                    <button type="submit" id="sendMail" name="sendMail" value="sendMail" class="btn btn-sm btn-outline-secondary mx-auto"><i class="fas fa-paper-plane"></i> Renvoyer l'email</button>
+                </div>
+            {% elif initiative.mode_validation == 'sms' %}
+                <div class="row mb-3">
+                    <button type="submit" id="sendSMS" name="sendSMS" value="sendSMS" class="btn btn-sm btn-outline-secondary mx-auto"><i class="fas fa-paper-plane"></i> Renvoyer le SMS</button>
+                </div>
+            {% endif %}
+
+            <div class="row">
+                <button type="submit" id="valider" name="valider" class="btn btn-primary w-50 mx-auto">Valider</button>
+            </div>
+        </div>
+    </form>
+{% endblock %}

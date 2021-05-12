@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+    {% if not initiative.mode_validation == initiative.MODE_VALIDATION_AUCUN %}
+        <nav class="d-flex process-flow">
+            <a href="#" class="nav-link active">Vote</a>
+            <a href="#" class="nav-link disabled">Validation du vote</a>
+        </nav>
+    {% endif %}
+
+    <h1>{{ initiative.nom }}</h1>
+    <h2>{{ initiative.cyberparlement.nom }}</h2>
+    <p>{{ initiative.description }}</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <h2>Voter</h2>
+        {% for choix_r in choix %}
+            <div class="form-check">
+                <input type="radio" id="reponse-{{ choix_r.id }}" name="reponse" value="{{ choix_r.id }}">
+                <label class="form-check-label" for="reponse-{{ choix_r.id }}">{{ choix_r.choix }}</label>
+            </div>
+        {% endfor %}
+        <div class="buttons d-flex flex-row justify-content-center">
+            <button type="submit" class="btn btn-primary btn-lg mt-4">Voter</button>
+        </div>
+        <div class="d-flex flex-row justify-content-center">
+            {% if initiative.mode_validation == initiative.MODE_VALIDATION_EMAIL %}
+                <small>*Un email vous sera envoyé afin de valider votre vote.</small>
+            {% elif initiative.mode_validation == initiative.MODE_VALIDATION_SMS %}
+                <small>*Un SMS vous sera envoyé afin de valider votre vote.</small>
+            {% endif %}
+        </div>
+    </form>
+{% endblock %}

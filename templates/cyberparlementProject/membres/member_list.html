@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Membres de {{ cyberparlement }}</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" id="file" name="file" accept="text/csv">
+        <button type="submit" value="{{ cyberparlement.id }}" class="btn-info btn ml-2">Importer un CSV</button>
+    </form>
+    {% for member in cyberparlement.members %}
+        {% include 'cyberparlementProject/membres/includes/member_include.html' %}
+    {% empty %}
+        <h5>Ce cyberparlement (<b>{{ cyberparlement }}</b>) ne possède pas de membre.</h5>
+    {% endfor %}
+{% endblock %}

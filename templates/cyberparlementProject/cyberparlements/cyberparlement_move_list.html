@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <form method="post">
+        {% csrf_token %}
+        <h2>Déplacer {{ cyberparlement }} dans la structure</h2>
+        {{ content | safe }}
+    </form>
+{% endblock %}
