@@ -3,14 +3,13 @@ import datetime
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.db.models import Q, Count
-from django.http import HttpResponse
 from django.shortcuts import redirect
-from django.template.loader import render_to_string
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView, DetailView, FormView, ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import TemplateView, DetailView, FormView, CreateView, UpdateView, DeleteView
 
 from cyberparlementProject.forms import InitiativePropositionForm, UserCreationForm, InitiativeStartPollForm, CyberparlementChangeForm, CyberparlementCreationForm, MemberChangeForm
 from cyberparlementProject.models import Initiative, Cyberparlement, Choixinitiative, Personne, Voteinitiative, Membrecp
+from cyberparlementProject.utils.cyberparlement import get_cyberparlement_id_by_slug, print_cyberparlement_tree, parse_cyberparlement_tree
 from cyberparlementProject.utils.schedule import schedule_poll_start, schedule_poll_end
 from cyberparlementProject.utils.validation import validate_token, send_validation_email
 
@@ -506,83 +505,19 @@ class InitiativeValidatePollVoteView(DetailView):
         return redirect(reverse_lazy('initiative-validate-poll-vote', kwargs={'pk': self.get_object().id}))
 
 
-content = ''  # contient la liste des cyberparlements
-
-
-def parse_cyberparlement_tree(tree, root, id_cyberparlement_selected):
-    """
-    retourne une liste des cyberparlements
-    sous forme d'arborescence
-    """
-    res = []
-    for child in tree:
-        if id_cyberparlement_selected != (
-                root.id if root is not None else None):
-            if child.cyberparlementparent_id == (
-                    root.id if root is not None else None):
-                child.enfant = parse_cyberparlement_tree(
-                    tree,
-                    child,
-                    id_cyberparlement_selected
-                )
-                res.append(child)
-    return res or None
-
-
-def print_cyberparlement_tree(tree, template, request=None, member=None):
-    """
-    retourne la liste des cyberparlements
-    de façon hiérarchique sous format html dans une string
-    """
-    global content
-    if tree is not None and len(tree) > 0:
-        content += '<div class=cp-list-container style=padding:10px>'
-        for node in tree:
-            content += render_to_string(
-                template_name=template,
-                context={
-                    'cyberparlement': node,
-                    'member': member,
-                },
-                request=request
-            )
-            print_cyberparlement_tree(
-                node.enfant,
-                template,
-                request,
-                member
-            )
-            content += '</div>'
-        content += '</div>'
-    return content
-
-
-def get_cyberparlement_id_by_slug(slug_cyberparlement):
-    """
-    retourne l'id d'un cyberparlement
-    en fonction de son slug
-    """
-    try:
-        return Cyberparlement.objects.get(slug=slug_cyberparlement).id
-    except Cyberparlement.DoesNotExist:
-        return None
-
-
 class CyberparlementListView(TemplateView):
     template_name = 'cyberparlementProject/cyberparlements/cyberparlement_list.html'
 
     def get_context_data(self, **kwargs):
         user = self.request.user
-        global content
-        content = ''
         context = super().get_context_data(**kwargs)
         context['title'] = 'Liste des cyberparlements'
         context['description'] = 'Consulter la liste des cyberparlements'
-        context['content'] = print_cyberparlement_tree(
+        context['content'] = ''.join(print_cyberparlement_tree(
             parse_cyberparlement_tree(user.cyberparlements, None, 0),
             'cyberparlementProject/cyberparlements/includes/cyberparlement_include.html',
-            self.request
-        )
+            [], self.request
+        ))
         return context
 
 
@@ -672,8 +607,6 @@ class CyberparlementMoveView(TemplateView):
 
     def get_context_data(self, **kwargs):
         user = self.request.user
-        global content
-        content = ''
         cyberparlement_selected = Cyberparlement.objects.get(slug=self.kwargs['slug'])
         context = super().get_context_data(**kwargs)
         context['title'] = 'Liste des cyberparlements'
@@ -681,11 +614,11 @@ class CyberparlementMoveView(TemplateView):
         context['cyberparlement'] = cyberparlement_selected
         user_cyberparlements = user.cyberparlements
         user_cyberparlements.remove(cyberparlement_selected)
-        context['content'] = print_cyberparlement_tree(
+        context['content'] = ''.join(print_cyberparlement_tree(
             parse_cyberparlement_tree(user_cyberparlements, None, cyberparlement_selected.id),
             'cyberparlementProject/cyberparlements/includes/cyberparlement_move_include.html',
-            self.request
-        )
+            [], self.request
+        ))
         return context
 
 
@@ -735,19 +668,17 @@ class MemberAffiliationView(TemplateView):
 
     def get_context_data(self, **kwargs):
         user = self.request.user
-        global content
-        content = ''
         member = Membrecp.objects.get(id=self.kwargs['pk'])
         user_cyberparlements = user.cyberparlements
         context = super().get_context_data(**kwargs)
         context['title'] = 'Liste des cyberparlements'
         context['description'] = 'Affilier un membre à un nouveau cyberparlement'
         context['member'] = member
-        context['content'] = print_cyberparlement_tree(
+        context['content'] = ''.join(print_cyberparlement_tree(
             parse_cyberparlement_tree(user_cyberparlements, None, 0),
             'cyberparlementProject/membres/includes/member_affiliation_include.html',
-            self.request,
-            member)
+            [], self.request,
+            member))
         return context
 
 
@@ -759,7 +690,7 @@ class MemberDeleteView(DeleteView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Suppression'
-        context['description'] = 'Supprimer un membre'
+        context['description'] = 'Exclure un membre d\'un cyberparlement'
         context['cyberparlement'] = Cyberparlement.objects.get(slug=self.kwargs['slug'])
         return context
 
