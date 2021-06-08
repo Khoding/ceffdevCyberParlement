@@ -9,7 +9,7 @@
             <div class="input-group">
                 <select id="user" name="user" class="form-control">
                     {% for select_user in users %}
-                        <option value="{{ select_user.username }}">{{ select_user.prenom }} {{ select_user.nom }}</option>
+                        <option value="{{ select_user.username }}">{{ select_user.first_name }} {{ select_user.last_name }}</option>
                     {% endfor %}
                 </select>
             </div>

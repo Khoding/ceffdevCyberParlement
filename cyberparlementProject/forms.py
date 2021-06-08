@@ -86,8 +86,8 @@ class MemberChangeForm(ModelForm):
     class Meta:
         model = Personne
         fields = [
-            'nom',
-            'prenom',
+            'last_name',
+            'first_name',
             'genre',
             'email',
             'adresse',

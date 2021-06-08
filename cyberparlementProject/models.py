@@ -15,7 +15,7 @@ from django.db.models import Q
 from django.db.models.signals import pre_save
 from django.template.defaultfilters import slugify
 
-from cyberparlementProject.utils.auth import generate_unique_vanity
+from cyberparlementProject.utils.auth import generate_unique_vanity, generate_vanity
 from cyberparlementProject.utils.validation import generate_validation_token
 
 
@@ -29,10 +29,10 @@ class Candidat(models.Model):
         unique_together = (('election', 'personne'),)
 
     def __unicode__(self):
-        return f"{self.personne.nom} {self.personne.prenom} pour {self.election.sujet}"
+        return f"{self.personne.first_name} {self.personne.last_name} pour {self.election.sujet}"
 
     def __str__(self):
-        return f"{self.personne.nom} {self.personne.prenom} pour {self.election.sujet}"
+        return f"{self.personne.first_name} {self.personne.last_name} pour {self.election.sujet}"
 
 
 class Cyberparlement(models.Model):
@@ -91,7 +91,7 @@ class Cyberparlement(models.Model):
         members = list(Membrecp.objects.filter(cyberparlement=self, rolemembrecyberparlement=Membrecp.ROLE_MEMBER))
         for children in childrens:
             members.extend(list(Membrecp.objects.filter(cyberparlement=children, rolemembrecyberparlement=Membrecp.ROLE_MEMBER)))
-        return sorted(members, key=lambda m: m.personne.nom)
+        return sorted(members, key=lambda m: m.personne.last_name)
 
     @property
     def cyberchancelier(self):
@@ -545,6 +545,12 @@ class Membrecp(models.Model):
         db_table = 'membrecp'
         unique_together = (('id', 'personne'),)
 
+    def __unicode__(self):
+        return f"{self.personne} - {self.cyberparlement}"
+
+    def __str__(self):
+        return f"{self.personne} - {self.cyberparlement}"
+
 
 class Message(models.Model):
     forum = models.ForeignKey(Forum, models.DO_NOTHING, db_column='idForum', blank=True, null=True)  # Field name made lowercase.
@@ -576,8 +582,6 @@ class Personne(AbstractUser):
         (STATUS_CONFIRMED_MAIL, 'Confirmé courrier'),
     ]
 
-    nom = models.CharField(db_column='Nom', max_length=45)
-    prenom = models.CharField(db_column='Prenom', max_length=45)
     genre = models.CharField(db_column='Genre', max_length=200, choices=GENDER_CHOICES, null=True)
     adresse = models.CharField(db_column='Adresse', max_length=45, blank=True, null=True)
     npa = models.IntegerField(db_column='NPA', blank=True, null=True, verbose_name='NPA')
@@ -597,15 +601,19 @@ class Personne(AbstractUser):
                 cyberparlements.extend(member.cyberparlement.childrens)
         return list(dict.fromkeys(cyberparlements))
 
+    def reset_password(self):
+        self.password = generate_vanity(8, 10)
+        self.save(update_fields=['password'])
+
     class Meta:
         managed = True
         db_table = 'personne'
 
     def __unicode__(self):
-        return f"{self.nom} {self.prenom}"
+        return f"{self.last_name} {self.first_name}"
 
     def __str__(self):
-        return f"{self.nom} {self.prenom}"
+        return f"{self.last_name} {self.first_name}"
 
 
 def give_default_username(sender, instance, *args, **kwargs):

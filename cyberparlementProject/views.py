@@ -11,6 +11,7 @@ from cyberparlementProject.forms import InitiativePropositionForm, UserCreationF
 from cyberparlementProject.models import Initiative, Cyberparlement, Choixinitiative, Personne, Voteinitiative, Membrecp
 from cyberparlementProject.utils.cyberparlement import print_cyberparlement_tree, parse_cyberparlement_tree
 from cyberparlementProject.utils.schedule import schedule_poll_start, schedule_poll_end
+from cyberparlementProject.utils.user import send_reset_password_email
 from cyberparlementProject.utils.validation import validate_token, send_validation_email
 
 
@@ -693,6 +694,17 @@ class MemberDeleteView(DeleteView):
         context['description'] = 'Exclure un membre d\'un cyberparlement'
         context['cyberparlement'] = Cyberparlement.objects.get(slug=self.kwargs['slug'])
         return context
+
+
+class MemberResetPasswordView(UpdateView):
+    model = Membrecp
+    template_name = 'cyberparlementProject/membres/member_confirm_reset_password.html'
+    fields = ('personne',)
+
+    def post(self, *args, **kwargs):
+        self.get_object().personne.reset_password()
+        send_reset_password_email(self.request.user, self.get_object().personne)
+        return redirect(reverse_lazy('member-list', kwargs={'slug': self.kwargs['slug']}))
 
 
 # Vues relatives à l'authentification

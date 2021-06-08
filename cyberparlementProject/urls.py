@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 from django.urls import path, include
 
-from cyberparlementProject.views import IndexView, InitiativeListView, InitiativePropositionView, UserCreateView, CyberparlementListView, UserLoginView, InitiativeValidationView, InitiativeStartPollView, InitiativePollVoteView, InitiativeValidatePollVoteView, InitiativePollDetailView, InitiativeCreateSecondRoundView, CyberparlementUpdateView, CyberparlementCreateView, MemberListView, MemberDeleteView, CyberparlementMoveView, MemberUpdateView, MemberAffiliationView
+from cyberparlementProject.views import IndexView, InitiativeListView, InitiativePropositionView, UserCreateView, CyberparlementListView, UserLoginView, InitiativeValidationView, InitiativeStartPollView, InitiativePollVoteView, InitiativeValidatePollVoteView, InitiativePollDetailView, InitiativeCreateSecondRoundView, CyberparlementUpdateView, CyberparlementCreateView, MemberListView, MemberDeleteView, CyberparlementMoveView, MemberUpdateView, MemberAffiliationView, MemberResetPasswordView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -41,6 +41,7 @@ urlpatterns = [
     path('cyberparlements/<slug:slug>/members/<int:pk>/update', MemberUpdateView.as_view(), name='member-update'),
     path('cyberparlements/<slug:slug>/members/<int:pk>/affiliation', MemberAffiliationView.as_view(), name='member-affiliation'),
     path('cyberparlements/<slug:slug>/members/<int:pk>/confirm_delete', MemberDeleteView.as_view(), name='member-delete'),
+    path('cyberparlements/<slug:slug>/members/<int:pk>/confirm_reset_password', MemberResetPasswordView.as_view(), name='member-reset-password'),
 
     # Vues relatives à l'authentification -- à des fins de test
     path('user/create/', UserCreateView.as_view(), name='user-create'),

@@ -33,7 +33,7 @@
                 <small>Si vous ne savez pas d'où provient cet email, veuillez le supprimer.</small>
             </p>
             {% if user.is_authenticated %}
-            <h2>Bonjour {{ user.prenom }} {{ user.nom }}</h2>
+            <h2>Bonjour {{ user.first_name }} {{ user.last_name }}</h2>
             {% else %}
             <h2>Bonjour Prénom Nom</h2>
             {% endif %}

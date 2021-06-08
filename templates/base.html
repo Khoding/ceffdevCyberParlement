@@ -54,7 +54,7 @@
 
         {% if request.user.is_authenticated %}
             <div>
-                {{ user.prenom }} {{ user.nom }}
+                {{ user.first_name }} {{ user.last_name }}
             </div>
         {% else %}
             <div>
