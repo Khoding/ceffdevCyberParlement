@@ -11,10 +11,10 @@ def parse_cyberparlement_tree(tree, root, id_cyberparlement_selected):
     res = []
     for child in tree:
         if id_cyberparlement_selected != (
-                root.id if root is not None else None):
+                root.id if root else None):
             if child.cyberparlementparent_id == (
-                    root.id if root is not None else None):
-                child.enfant = parse_cyberparlement_tree(
+                    root.id if root else None):
+                child.children = parse_cyberparlement_tree(
                     tree,
                     child,
                     id_cyberparlement_selected
@@ -26,11 +26,9 @@ def parse_cyberparlement_tree(tree, root, id_cyberparlement_selected):
 def print_cyberparlement_tree(tree, template, content_tree: list, request=None, member=None):
     """
     retourne la liste des cyberparlements
-    de façon hiérarchique sous format html dans une string
+    de façon hiérarchique sous format html dans une list string
     """
-    if tree is not None and len(tree) > 0:
-        if tree is None:
-            return
+    if tree and len(tree) > 0:
         content_tree.append('<div class=cp-list-container style=padding:10px>')
         for node in tree:
             content_tree.append(render_to_string(
@@ -42,7 +40,7 @@ def print_cyberparlement_tree(tree, template, content_tree: list, request=None, 
                 request=request
             ))
             print_cyberparlement_tree(
-                node.enfant,
+                node.children,
                 template,
                 content_tree,
                 request,
@@ -51,14 +49,3 @@ def print_cyberparlement_tree(tree, template, content_tree: list, request=None, 
             content_tree.append('</div>')
         content_tree.append('</div>')
     return content_tree
-
-
-def get_cyberparlement_id_by_slug(slug_cyberparlement):
-    """
-    retourne l'id d'un cyberparlement
-    en fonction de son slug
-    """
-    try:
-        return Cyberparlement.objects.get(slug=slug_cyberparlement).id
-    except Cyberparlement.DoesNotExist:
-        return None

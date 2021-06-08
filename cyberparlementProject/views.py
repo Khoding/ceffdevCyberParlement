@@ -9,7 +9,7 @@ from django.views.generic import TemplateView, DetailView, FormView, CreateView,
 
 from cyberparlementProject.forms import InitiativePropositionForm, UserCreationForm, InitiativeStartPollForm, CyberparlementChangeForm, CyberparlementCreationForm, MemberChangeForm
 from cyberparlementProject.models import Initiative, Cyberparlement, Choixinitiative, Personne, Voteinitiative, Membrecp
-from cyberparlementProject.utils.cyberparlement import get_cyberparlement_id_by_slug, print_cyberparlement_tree, parse_cyberparlement_tree
+from cyberparlementProject.utils.cyberparlement import print_cyberparlement_tree, parse_cyberparlement_tree
 from cyberparlementProject.utils.schedule import schedule_poll_start, schedule_poll_end
 from cyberparlementProject.utils.validation import validate_token, send_validation_email
 
@@ -529,48 +529,48 @@ class CyberparlementUpdateView(UpdateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        cyberparlement = Cyberparlement.objects.get(slug=self.kwargs['slug'])
-        members_choices = [(member.personne.id, member.personne) for member in cyberparlement.members]
-        if cyberparlement.cyberchancelier:
-            members_choices.insert(0, (cyberparlement.cyberchancelier.id, cyberparlement.cyberchancelier))
+        members_choices = [(member.personne.id, member.personne) for member in self.get_object().members]
+        if self.get_object().cyberchancelier:
+            members_choices.insert(0, (self.get_object().cyberchancelier.id, self.get_object().cyberchancelier))
         kwargs['members_choices'] = members_choices
         return kwargs
 
     def delete_current_cyberchancelier(self):
         current_cyberchancelier = Membrecp.objects.get(
-            cyberparlement=Cyberparlement.objects.get(slug=self.kwargs['slug']),
+            cyberparlement=self.get_object(),
             rolemembrecyberparlement=Membrecp.ROLE_CYBERCHANCELIER)
         current_cyberchancelier.rolemembrecyberparlement = Membrecp.ROLE_MEMBER
         current_cyberchancelier.save()
 
     def set_cyberchancelier(self, id_selected):
-        if Cyberparlement.objects.get(slug=self.kwargs['slug']).cyberchancelier:
+        if self.get_object().cyberchancelier:
             self.delete_current_cyberchancelier()
         try:
             member_selected = Membrecp.objects.get(
                 personne_id=id_selected,
-                cyberparlement_id=get_cyberparlement_id_by_slug(self.kwargs['slug'])
+                cyberparlement=self.get_object()
             )
             member_selected.rolemembrecyberparlement = Membrecp.ROLE_CYBERCHANCELIER
             member_selected.save()
         except Membrecp.DoesNotExist:
             member_selected = Membrecp(
                 personne_id=id_selected,
-                cyberparlement_id=get_cyberparlement_id_by_slug(self.kwargs['slug']),
+                cyberparlement=self.get_object(),
                 rolemembrecyberparlement=Membrecp.ROLE_CYBERCHANCELIER
             )
             member_selected.save()
 
     def form_valid(self, form):
         selected_id = self.request.POST.get('cyberchancelier')
-        if Cyberparlement.objects.get(slug=self.kwargs['slug']).cyberchancelier:
-            if selected_id != Cyberparlement.objects.get(slug=self.kwargs['slug']).cyberchancelier.id:
+        if self.get_object().cyberchancelier and selected_id:
+            if selected_id != self.get_object().cyberchancelier.id:
                 self.set_cyberchancelier(selected_id)
-        else:
+        elif selected_id:
             self.set_cyberchancelier(selected_id)
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
+        print(self.get_object().path)
         context = super().get_context_data(**kwargs)
         context['title'] = 'Cyberparlement'
         context['description'] = 'Modifier un cyberparlement'
@@ -584,12 +584,12 @@ class CyberparlementCreateView(CreateView):
     success_url = reverse_lazy("cyberparlement-list")
 
     def form_valid(self, form):
-        form.instance.cyberparlementparent = Cyberparlement.objects.get(slug=self.kwargs['slug'])
+        form.instance.cyberparlementparent = self.get_object()
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['cyberparlement'] = Cyberparlement.objects.get(slug=self.kwargs['slug'])
+        context['cyberparlement'] = self.get_object()
         return context
 
 
@@ -650,7 +650,7 @@ class MemberUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['person'] = Personne.objects.get(id=self.kwargs['pk'])
+        context['person'] = self.get_object()
         return context
 
 

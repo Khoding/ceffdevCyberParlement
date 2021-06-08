@@ -53,7 +53,7 @@ class InitiativeStartPollForm(ModelForm):
 
 
 class CyberparlementChangeForm(ModelForm):
-    cyberchancelier = ChoiceField(label='Cyberchancelier', choices=[], widget=Select)
+    cyberchancelier = ChoiceField(label='Cyberchancelier', choices=[], widget=Select, required=False)
 
     def __init__(self, *args, **kwargs):
         members_choices = kwargs.pop('members_choices')

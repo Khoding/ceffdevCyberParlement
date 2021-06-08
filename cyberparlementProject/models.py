@@ -78,6 +78,10 @@ class Cyberparlement(models.Model):
         return sorted(childrens, key=lambda c: c.nom)
 
     @property
+    def path(self):
+        return (' > '.join([parent.nom for parent in self.parents][::-1])) + ' > ' + self.nom if self.parents else None
+
+    @property
     def direct_members(self):
         return Membrecp.objects.filter(cyberparlement=self)
 
