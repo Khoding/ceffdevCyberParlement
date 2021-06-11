@@ -3,7 +3,7 @@ from django_q.tasks import async_task
 
 
 def send_reset_password_email(cyberchancelier, member):
-    template = render_to_string(template_name='cyberparlementProject/mail/poll_vote_validation.html',
+    template = render_to_string(template_name='cyberparlementProject/mail/reset_password.html',
                                 context={
                                     'member': member
                                 })
