@@ -29,9 +29,7 @@ def validate_token(validation_code, voteinitiative):
     :return:
     """
 
-    if voteinitiative.code_validation == validation_code:
-        return True
-    return False
+    return voteinitiative.code_validation == validation_code
 
 
 def send_validation_email(voteinitiative, initiative, request):

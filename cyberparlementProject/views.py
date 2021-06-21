@@ -249,7 +249,7 @@ class InitiativeValidationView(FormView):
 
 class InitiativeCreateSecondRoundView(FormView):
     """
-    Vue de permettant de créer un nouveau tour.
+    Vue permettant de créer un nouveau tour.
 
     **Contexte**
 
@@ -315,7 +315,7 @@ class InitiativeCreateSecondRoundView(FormView):
 
 class InitiativeStartPollView(FormView):
     """
-    Vue de permettant d'organiser un scrutin.
+    Vue permettant d'organiser un scrutin.
 
     **Contexte**
 
@@ -362,7 +362,7 @@ class InitiativeStartPollView(FormView):
 
 class InitiativePollVoteView(DetailView):
     """
-    Vue de permettant de voter durant un scrutin.
+    Vue permettant de voter durant un scrutin.
 
     **Contexte**
     ``title``
@@ -494,7 +494,6 @@ class InitiativeValidatePollVoteView(DetailView):
         if self.request.POST.get('validationCode'):
             validation_code = self.request.POST.get('validationCode')
             is_valid = validate_token(validation_code=validation_code, voteinitiative=self.get_voteinitiative())
-            print(is_valid)
             if is_valid:
                 choix_initiative = self.get_voteinitiative()
                 choix_initiative.statut_validation = Voteinitiative.STATUT_VALIDATION_VALIDE
@@ -507,6 +506,24 @@ class InitiativeValidatePollVoteView(DetailView):
 
 
 class CyberparlementListView(TemplateView):
+    """
+    Vue de la liste des cyberparlements.
+
+    **Contexte**
+
+    ``title``
+        Titre de la page
+
+    ``description``
+        Description de la page
+
+    ``content``
+        Liste des cyberparlements
+
+    **Template**
+    :template:'cyberparlementProject/cyberparlements/cyberparlement_list.html'
+    """
+
     template_name = 'cyberparlementProject/cyberparlements/cyberparlement_list.html'
 
     def get_context_data(self, **kwargs):
@@ -523,6 +540,21 @@ class CyberparlementListView(TemplateView):
 
 
 class CyberparlementUpdateView(UpdateView):
+    """
+    Vue de modification d'un cyberparlement.
+
+    **Contexte**
+
+    ``title``
+        Titre de la page
+
+    ``description``
+        Description de la page
+
+    **Template**
+    :template:'cyberparlementProject/cyberparlements/cyberparlement_update.html'
+    """
+
     template_name = 'cyberparlementProject/cyberparlements/cyberparlement_update.html'
     form_class = CyberparlementChangeForm
     model = Cyberparlement
@@ -579,6 +611,24 @@ class CyberparlementUpdateView(UpdateView):
 
 
 class CyberparlementCreateView(CreateView):
+    """
+    Vue de création d'un nouveau cyberparlement.
+
+    **Contexte**
+
+    ``title``
+        Titre de la page
+
+    ``description``
+        Description de la page
+
+    ``cyberparlement``
+        Cyberparlement dans lequel se fait la création
+
+    **Template**
+    :template:'cyberparlementProject/cyberparlements/cyberparlement_create.html'
+    """
+
     template_name = 'cyberparlementProject/cyberparlements/cyberparlement_create.html'
     form_class = CyberparlementCreationForm
     model = Cyberparlement
@@ -590,11 +640,34 @@ class CyberparlementCreateView(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['title'] = 'Liste des cyberparlements'
+        context['description'] = 'Consulter la liste des cyberparlements'
         context['cyberparlement'] = self.get_object()
         return context
 
 
 class CyberparlementMoveView(TemplateView):
+    """
+    Vue de déplacement d'un nouveau cyberparlement.
+
+    **Contexte**
+
+    ``title``
+        Titre de la page
+
+    ``description``
+        Description de la page
+
+    ``cyberparlement``
+        Cyberparlement à déplacer
+
+    ``content``
+       Liste des cyberparlements
+
+    **Template**
+    :template:'cyberparlementProject/cyberparlements/cyberparlement_move_list.html'
+    """
+
     template_name = 'cyberparlementProject/cyberparlements/cyberparlement_move_list.html'
 
     def set_new_parent(self, parent_id):
@@ -624,6 +697,21 @@ class CyberparlementMoveView(TemplateView):
 
 
 class MemberListView(DetailView):
+    """
+    Vue de la liste des membres d'un cyberparlement.
+
+    **Contexte**
+
+    ``title``
+        Titre de la page
+
+    ``description``
+        Description de la page
+
+    **Template**
+    :template:'cyberparlementProject/membres/member_list.html'
+    """
+
     model = Cyberparlement
     template_name = 'cyberparlementProject/membres/member_list.html'
 
@@ -642,6 +730,21 @@ class MemberListView(DetailView):
 
 
 class MemberUpdateView(UpdateView):
+    """
+    Vue de modification d'un membre.
+
+    **Contexte**
+
+    ``title``
+        Titre de la page
+
+    ``description``
+        Description de la page
+
+    **Template**
+    :template:'cyberparlementProject/membres/member_update.html'
+    """
+
     model = Personne
     form_class = MemberChangeForm
     template_name = 'cyberparlementProject/membres/member_update.html'
@@ -651,11 +754,33 @@ class MemberUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['person'] = self.get_object()
+        context['title'] = 'Modification'
+        context['description'] = 'Modifier un membre d\'un cyberparlement'
         return context
 
 
 class MemberAffiliationView(TemplateView):
+    """
+    Vue de d'affiliation d'un membre.
+
+    **Contexte**
+
+    ``title``
+        Titre de la page
+
+    ``description``
+        Description de la page
+
+    ``member``
+        Membre à affilier
+
+    ``content``
+       Liste des cyberparlements
+
+    **Template**
+    :template:'cyberparlementProject/membres/member_affiliation.html'
+    """
+
     template_name = 'cyberparlementProject/membres/member_affiliation.html'
 
     def set_new_cyberparlement(self, cyberparlement_id):
@@ -684,6 +809,24 @@ class MemberAffiliationView(TemplateView):
 
 
 class MemberDeleteView(DeleteView):
+    """
+    Vue de suppression d'un membre.
+
+    **Contexte**
+
+    ``title``
+        Titre de la page
+
+    ``description``
+        Description de la page
+
+    ``cyberparlement``
+        Cyberparlement dans lequel le membre est supprimé
+
+    **Template**
+    :template:'cyberparlementProject/membres/member_confirm_delete.html'
+    """
+
     model = Membrecp
     template_name = 'cyberparlementProject/membres/member_confirm_delete.html'
     success_url = reverse_lazy("cyberparlement-list")
@@ -697,6 +840,21 @@ class MemberDeleteView(DeleteView):
 
 
 class MemberResetPasswordView(UpdateView):
+    """
+    Vue de création d'un nouveau cyberparlement.
+
+    **Contexte**
+
+    ``title``
+        Titre de la page
+
+    ``description``
+        Description de la page
+
+    **Template**
+    :template:'cyberparlementProject/membres/member_confirm_reset_password.html'
+    """
+
     model = Membrecp
     template_name = 'cyberparlementProject/membres/member_confirm_reset_password.html'
     fields = ('personne',)
@@ -705,6 +863,12 @@ class MemberResetPasswordView(UpdateView):
         self.get_object().personne.reset_password()
         send_reset_password_email(self.request.user, self.get_object().personne)
         return redirect(reverse_lazy('member-list', kwargs={'slug': self.kwargs['slug']}))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Cyberparlement'
+        context['description'] = 'Réinitialiser le mot de passe d\'un membre'
+        return context
 
 
 # Vues relatives à l'authentification
