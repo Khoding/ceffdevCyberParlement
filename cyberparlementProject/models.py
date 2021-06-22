@@ -124,8 +124,8 @@ class Cyberparlement(models.Model):
         persons = [
             Personne(
                 username=generate_unique_vanity(5, 8, Personne),
-                nom=row['Nom'],
-                prenom=row['Prénom'],
+                last_name=row['Nom'],
+                first_name=row['Prénom'],
                 genre=row['Genre'],
                 email=row['Email'],
                 adresse=row['Adresse'],

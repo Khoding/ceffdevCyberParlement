@@ -603,7 +603,6 @@ class CyberparlementUpdateView(UpdateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        print(self.get_object().path)
         context = super().get_context_data(**kwargs)
         context['title'] = 'Cyberparlement'
         context['description'] = 'Modifier un cyberparlement'
